@@ -26,13 +26,13 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
     public function getMessage(string $id, string $category, string $locale, array $parameters = []): ?string
     {
         if (!isset($this->messages[$category][$locale])) {
-            $this->read($category, $locale);
+            $this->messages[$category][$locale] = $this->read($category, $locale);
         }
 
         return $this->messages[$category][$locale][$id] ?? null;
     }
 
-    private function read(string $category, string $locale): void
+    private function read(string $category, string $locale): array
     {
         $query = (new Query($this->db))
             ->select(['message_id', 'translation'])
@@ -47,12 +47,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             ]);
         $messages = $query->all();
 
-        $this->messages[$category][$locale] = ArrayHelper::map($messages, 'message_id', 'translation');
-    }
-
-    private function clean(string $category, string $locale): void
-    {
-        unset($this->messages[$category][$locale]);
+        return ArrayHelper::map($messages, 'message_id', 'translation');
     }
 
     public function setSourceMessageTable(string $sourceMessageTable): void
@@ -75,7 +70,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
         $sourceMessages = ArrayHelper::map($sourceMessages, 'message_id', 'id');
 
-        $this->read($category, $locale);
+        $translateMessages = $this->read($category, $locale);
 
         foreach ($messages as $message_id => $translation) {
             if (!isset($sourceMessages[$message_id])) {
@@ -86,18 +81,16 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             }
 
             $needUpdate = false;
-            if (isset($this->messages[$category][$locale][$message_id]) && $this->messages[$category][$locale][$message_id] !== $translation) {
+            if (isset($translateMessages[$message_id]) && $translateMessages[$message_id] !== $translation) {
                 $this->db->createCommand()->delete($this->messageTable, ['id' => $sourceMessages[$message_id]])->execute();
                 $needUpdate = true;
             }
 
-            if ($needUpdate || !isset($this->messages[$category][$locale][$message_id])) {
+            if ($needUpdate || !isset($translateMessages[$message_id])) {
                 $result = $this->db->getSchema()->insert($this->messageTable, ['id' => $sourceMessages[$message_id], 'locale' => $locale, 'translation' => $translation]);
                 if ($result===false)
                     throw new \RuntimeException('Can not create source message with id ' . $message_id);
             }
         }
-
-        $this->clean($category, $locale);
     }
 }
