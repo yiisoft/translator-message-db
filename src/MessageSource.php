@@ -18,6 +18,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
     private string $sourceMessageTable = '{{%source_message}}';
     private string $messageTable = '{{%message}}';
 
+
     public function __construct(ConnectionInterface $db)
     {
         $this->db = $db;
@@ -70,26 +71,26 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
         $sourceMessages = ArrayHelper::map($sourceMessages, 'message_id', 'id');
 
-        $translateMessages = $this->read($category, $locale);
+        $translatedMessages = $this->read($category, $locale);
 
-        foreach ($messages as $message_id => $translation) {
-            if (!isset($sourceMessages[$message_id])) {
-                $result = $this->db->getSchema()->insert($this->sourceMessageTable, ['category' => $category, 'message_id' => $message_id]);
-                if ($result===false)
-                    throw new \RuntimeException('Can not create source message with id ' . $message_id);
-                $sourceMessages[$message_id] = $result['id'];
+        foreach ($messages as $messageId => $translation) {
+            if (!isset($sourceMessages[$messageId])) {
+                $result = $this->db->getSchema()->insert($this->sourceMessageTable, ['category' => $category, 'message_id' => $messageId]);
+                if ($result === false)
+                    throw new \RuntimeException('Can not create source message with id ' . $messageId);
+                $sourceMessages[$messageId] = $result['id'];
             }
 
             $needUpdate = false;
-            if (isset($translateMessages[$message_id]) && $translateMessages[$message_id] !== $translation) {
-                $this->db->createCommand()->delete($this->messageTable, ['id' => $sourceMessages[$message_id]])->execute();
+            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId] !== $translation) {
+                $this->db->createCommand()->delete($this->messageTable, ['id' => $sourceMessages[$messageId]])->execute();
                 $needUpdate = true;
             }
 
-            if ($needUpdate || !isset($translateMessages[$message_id])) {
-                $result = $this->db->getSchema()->insert($this->messageTable, ['id' => $sourceMessages[$message_id], 'locale' => $locale, 'translation' => $translation]);
-                if ($result===false)
-                    throw new \RuntimeException('Can not create source message with id ' . $message_id);
+            if ($needUpdate || !isset($translatedMessages[$messageId])) {
+                $result = $this->db->getSchema()->insert($this->messageTable, ['id' => $sourceMessages[$messageId], 'locale' => $locale, 'translation' => $translation]);
+                if ($result === false)
+                    throw new \RuntimeException('Can not create source message with id ' . $messageId);
             }
         }
     }
