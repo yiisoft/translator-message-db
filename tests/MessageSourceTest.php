@@ -33,6 +33,7 @@ final class MessageSourceTest extends TestCase
     private Application $application;
     private Aliases $aliases;
     private ?ConnectionInterface $db = null;
+    private ?CacheInterface $cache = null;
     private ConsoleHelper $consoleHelper;
     private Migration $migration;
     private MigrationService $migrationService;
@@ -118,6 +119,25 @@ final class MessageSourceTest extends TestCase
         }
     }
 
+    public function testMultiWriteWithCache(): void
+    {
+        $allData = $this->generateTranslationsData();
+
+        $messageSource = new MessageSource($this->db, $this->cache);
+
+        foreach ($allData as $fileData) {
+            [$category, $locale, $data] = $fileData;
+            $messageSource->write($category, $locale, $data);
+        }
+
+        foreach ($allData as $fileData) {
+            [$category, $locale, $data] = $fileData;
+            foreach ($data as $id=>$value) {
+                $this->assertEquals($value, $messageSource->getMessage($id, $category, $locale));
+            }
+        }
+    }
+
     protected function configContainer(): void
     {
         $this->container = new Container($this->config());
@@ -126,6 +146,7 @@ final class MessageSourceTest extends TestCase
         $this->aliases = $this->container->get(Aliases::class);
         $this->consoleHelper = $this->container->get(ConsoleHelper::class);
         $this->db = $this->container->get(ConnectionInterface::class);
+        $this->cache = $this->container->get(CacheInterface::class);
         $this->migration = $this->container->get(Migration::class);
         $this->migrationService = $this->container->get(MigrationService::class);
 
