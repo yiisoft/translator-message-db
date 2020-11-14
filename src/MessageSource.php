@@ -74,16 +74,6 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         return ArrayHelper::map($messages, 'message_id', 'translation');
     }
 
-    public function setSourceMessageTable(string $sourceMessageTable): void
-    {
-        $this->sourceMessageTable = $sourceMessageTable;
-    }
-
-    public function setMessageTable(string $messageTable): void
-    {
-        $this->messageTable = $messageTable;
-    }
-
     public function write(string $category, string $locale, array $messages): void
     {
         $sourceMessages = (new Query($this->db))
@@ -118,7 +108,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         }
     }
 
-    public function getCacheKey(string $category, string $locale): string
+    private function getCacheKey(string $category, string $locale): string
     {
         $key = [
             __CLASS__,
