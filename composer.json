@@ -1,37 +1,46 @@
 {
-    "name": "yiisoft/_____",
+    "name": "yiisoft/translator-message-db",
     "type": "library",
-    "description": "_____",
+    "description": "Yii DB message storage",
     "keywords": [
-        "_____"
+        "i18n",
+        "internationalization",
+        "formatting",
+        "message storage"
     ],
     "homepage": "https://www.yiiframework.com/",
     "license": "BSD-3-Clause",
     "support": {
-        "issues": "https://github.com/yiisoft/_____/issues?state=open",
+        "issues": "https://github.com/yiisoft/translator-message-db/issues?state=open",
         "forum": "https://www.yiiframework.com/forum/",
         "wiki": "https://www.yiiframework.com/wiki/",
         "irc": "irc://irc.freenode.net/yii",
-        "source": "https://github.com/yiisoft/_____"
+        "source": "https://github.com/yiisoft/translator-message-db"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^7.4|^8.0"
+        "php": "^7.4|^8.0",
+        "yiisoft/translator": "3.0.x-dev",
+        "yiisoft/db": "3.0.x-dev",
+        "yiisoft/arrays": "3.0.x-dev",
+        "psr/simple-cache": "~1.0.0"
     },
     "require-dev": {
         "infection/infection": "^0.18.2",
         "phpunit/phpunit": "^9.4",
-        "vimeo/psalm": "^4.0"
+        "vimeo/psalm": "^4.0",
+        "yiisoft/yii-db-migration": "dev-master",
+        "yiisoft/db-sqlite": "3.0.x-dev"
     },
     "autoload": {
         "psr-4": {
-            "Yiisoft\\_____\\": "src"
+            "Yiisoft\\Translator\\Message\\Db\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Yiisoft\\_____\\Tests\\": "tests"
+            "Yiisoft\\Translator\\Message\\Db\\Tests\\": "tests"
         }
     },
     "extra": {
