@@ -61,11 +61,13 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         $query = (new Query($this->db))
             ->select(['message_id', 'translation'])
             ->from(['ts' => $this->sourceMessageTable])
-            ->innerJoin(['td' => $this->messageTable],
+            ->innerJoin(
+                ['td' => $this->messageTable],
                 [
                     'td.id' => new Expression('[[ts.id]]'),
-                    'ts.category' => $category
-                ])
+                    'ts.category' => $category,
+                ]
+            )
             ->where([
                 'locale' => $locale,
             ]);
@@ -89,8 +91,9 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         foreach ($messages as $messageId => $translation) {
             if (!isset($sourceMessages[$messageId])) {
                 $result = $this->db->getSchema()->insert($this->sourceMessageTable, ['category' => $category, 'message_id' => $messageId]);
-                if ($result === false)
+                if ($result === false) {
                     throw new \RuntimeException('Can not create source message with id ' . $messageId);
+                }
                 $sourceMessages[$messageId] = $result['id'];
             }
 
@@ -102,8 +105,9 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
             if ($needUpdate || !isset($translatedMessages[$messageId])) {
                 $result = $this->db->getSchema()->insert($this->messageTable, ['id' => $sourceMessages[$messageId], 'locale' => $locale, 'translation' => $translation]);
-                if ($result === false)
+                if ($result === false) {
                     throw new \RuntimeException('Can not create source message with id ' . $messageId);
+                }
             }
         }
     }
@@ -113,7 +117,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         $key = [
             __CLASS__,
             $category,
-            $locale
+            $locale,
         ];
 
         $jsonKey = json_encode($key);

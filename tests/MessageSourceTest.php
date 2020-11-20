@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Tester\CommandTester;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
@@ -17,18 +18,16 @@ use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Sqlite\Connection;
 use Yiisoft\Di\Container;
-use Yiisoft\Translator\Message\Db\MessageSource;
 use Yiisoft\Factory\Definitions\Reference;
+use Yiisoft\Translator\Message\Db\MessageSource;
 use Yiisoft\Yii\Console\Application;
 use Yiisoft\Yii\Db\Migration\Command\DownCommand;
 use Yiisoft\Yii\Db\Migration\Command\UpdateCommand;
 use Yiisoft\Yii\Db\Migration\Helper\ConsoleHelper;
 use Yiisoft\Yii\Db\Migration\Service\MigrationService;
-use Symfony\Component\Console\Tester\CommandTester;
 
 final class MessageSourceTest extends TestCase
 {
-
     private ContainerInterface $container;
     private Application $application;
     private Aliases $aliases;
@@ -74,7 +73,7 @@ final class MessageSourceTest extends TestCase
                     'test.id1' => 'app: Test 1 on the (de)',
                     'test.id2' => 'app: Test 2 on the (de)',
                     'test.id3' => 'app: Test 3 on the (de)',
-                ]
+                ],
             ],
             [
                 'app',
@@ -82,7 +81,7 @@ final class MessageSourceTest extends TestCase
                 [
                     'test.id1' => 'app: Test 1 on the (de-DE)',
                     'test.id2' => 'app: Test 2 on the (de-DE)',
-                ]
+                ],
             ],
         ];
     }
@@ -113,7 +112,7 @@ final class MessageSourceTest extends TestCase
 
         foreach ($allData as $fileData) {
             [$category, $locale, $data] = $fileData;
-            foreach ($data as $id=>$value) {
+            foreach ($data as $id => $value) {
                 $this->assertEquals($value, $messageSource->getMessage($id, $category, $locale));
             }
         }
@@ -132,7 +131,7 @@ final class MessageSourceTest extends TestCase
 
         foreach ($allData as $fileData) {
             [$category, $locale, $data] = $fileData;
-            foreach ($data as $id=>$value) {
+            foreach ($data as $id => $value) {
                 $this->assertEquals($value, $messageSource->getMessage($id, $category, $locale));
             }
         }
@@ -166,12 +165,12 @@ final class MessageSourceTest extends TestCase
         return [
             Aliases::class => [
                 '@root' => dirname(__DIR__, 1),
-                '@yiisoft/yii/db/migration' => dirname(__DIR__, 1)
+                '@yiisoft/yii/db/migration' => dirname(__DIR__, 1),
             ],
 
             Cache::class => [
                 '__class' => Cache::class,
-                '__construct()' => [Reference::to(ArrayCache::class)]
+                '__construct()' => [Reference::to(ArrayCache::class)],
             ],
 
             CacheInterface::class => Cache::class,
@@ -181,8 +180,8 @@ final class MessageSourceTest extends TestCase
             ConnectionInterface::class => [
                 '__class' => Connection::class,
                 '__construct()' => [
-                    'dsn' => 'sqlite:' . __DIR__ . '/Data/yiitest.sq3'
-                ]
+                    'dsn' => 'sqlite:' . __DIR__ . '/Data/yiitest.sq3',
+                ],
             ],
         ];
     }
