@@ -25,6 +25,7 @@ final class M201104110256CreateMessageSource extends Migration implements Revert
             'id' => $this->primaryKey(),
             'category' => $this->string(),
             'message_id' => $this->text(),
+            'comment' => $this->text(),
         ], $tableOptions);
 
         $this->createTable('{{%message}}', [

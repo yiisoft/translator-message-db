@@ -21,7 +21,7 @@
     "prefer-stable": true,
     "require": {
         "php": "^7.4|^8.0",
-        "psr/simple-cache": "^1.0.1",
+        "yiisoft/cache": "3.0.x-dev",
         "yiisoft/arrays": "3.0.x-dev",
         "yiisoft/db": "3.0.x-dev",
         "yiisoft/translator": "3.0.x-dev"

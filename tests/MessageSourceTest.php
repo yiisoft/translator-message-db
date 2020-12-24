@@ -70,17 +70,28 @@ final class MessageSourceTest extends TestCase
                 'app',
                 'de',
                 [
-                    'test.id1' => 'app: Test 1 on the (de)',
-                    'test.id2' => 'app: Test 2 on the (de)',
-                    'test.id3' => 'app: Test 3 on the (de)',
+                    'test.id1' => [
+                        'comment' => 'Translate wisely!',
+                        'message' => 'app: Test 1 on the (de)',
+                    ],
+                    'test.id2' => [
+                        'message' => 'app: Test 2 on the (de)',
+                    ],
+                    'test.id3' => [
+                        'message' => 'app: Test 3 on the (de)',
+                    ],
                 ],
             ],
             [
                 'app',
                 'de-DE',
                 [
-                    'test.id1' => 'app: Test 1 on the (de-DE)',
-                    'test.id2' => 'app: Test 2 on the (de-DE)',
+                    'test.id1' => [
+                        'message' => 'app: Test 1 on the (de-DE)',
+                    ],
+                    'test.id2' => [
+                        'message' => 'app: Test 2 on the (de-DE)',
+                    ],
                 ],
             ],
         ];
@@ -94,8 +105,8 @@ final class MessageSourceTest extends TestCase
         $messageSource = new MessageSource($this->db);
         $messageSource->write($category, $locale, $data);
 
-        foreach ($data as $id => $value) {
-            $this->assertEquals($value, $messageSource->getMessage($id, $category, $locale));
+        foreach ($data as $messageId => $messageData) {
+            $this->assertEquals($messageData['message'], $messageSource->getMessage($messageId, $category, $locale));
         }
     }
 
@@ -112,8 +123,8 @@ final class MessageSourceTest extends TestCase
 
         foreach ($allData as $fileData) {
             [$category, $locale, $data] = $fileData;
-            foreach ($data as $id => $value) {
-                $this->assertEquals($value, $messageSource->getMessage($id, $category, $locale));
+            foreach ($data as $messageId => $messageData) {
+                $this->assertEquals($messageData['message'], $messageSource->getMessage($messageId, $category, $locale));
             }
         }
     }
@@ -131,8 +142,8 @@ final class MessageSourceTest extends TestCase
 
         foreach ($allData as $fileData) {
             [$category, $locale, $data] = $fileData;
-            foreach ($data as $id => $value) {
-                $this->assertEquals($value, $messageSource->getMessage($id, $category, $locale));
+            foreach ($data as $messageId => $messageData) {
+                $this->assertEquals($messageData['message'], $messageSource->getMessage($messageId, $category, $locale));
             }
         }
     }
@@ -168,12 +179,10 @@ final class MessageSourceTest extends TestCase
                 '@yiisoft/yii/db/migration' => dirname(__DIR__, 1),
             ],
 
-            Cache::class => [
+            CacheInterface::class => [
                 '__class' => Cache::class,
                 '__construct()' => [Reference::to(ArrayCache::class)],
             ],
-
-            CacheInterface::class => Cache::class,
 
             LoggerInterface::class => NullLogger::class,
 

@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db;
 
-use Psr\SimpleCache\CacheInterface;
+use InvalidArgumentException;
 use Yiisoft\Arrays\ArrayHelper;
+use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Expression\Expression;
 use Yiisoft\Db\Query\Query;
 use Yiisoft\Translator\MessageReaderInterface;
 use Yiisoft\Translator\MessageWriterInterface;
+use function array_key_exists;
+use function is_string;
 
 final class MessageSource implements MessageReaderInterface, MessageWriterInterface
 {
@@ -19,7 +22,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
     private string $sourceMessageTable = '{{%source_message}}';
     private string $messageTable = '{{%message}}';
 
-    private ?CacheInterface $cache = null;
+    private ?CacheInterface $cache;
     private int $cachingDuration = 3600;
 
     public function __construct(ConnectionInterface $db, ?CacheInterface $cache = null, ?int $cacheDuration = null)
@@ -40,17 +43,14 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
     private function read(string $category, string $locale): array
     {
-        if ($this->cache instanceof CacheInterface) {
-            $key = $this->getCacheKey($category, $locale);
-
-            $messages = $this->cache->get($key);
-
-            if ($messages === null) {
-                $messages = $this->readFromDb($category, $locale);
-                $this->cache->set($key, $messages, $this->cachingDuration);
-            }
-
-            return $messages;
+        if ($this->cache !== null) {
+            return $this->cache->getOrSet(
+                $this->getCacheKey($category, $locale),
+                function () use ($category, $locale) {
+                    return $this->readFromDb($category, $locale);
+                },
+                $this->cachingDuration
+            );
         }
 
         return $this->readFromDb($category, $locale);
@@ -88,25 +88,49 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
         $translatedMessages = $this->readFromDb($category, $locale);
 
-        foreach ($messages as $messageId => $translation) {
+        foreach ($messages as $messageId => $messageData) {
+            if (!array_key_exists('message', $messageData)) {
+                throw new InvalidArgumentException("Message is not valid for ID \"$messageId\". \"message\" key is missing.");
+            }
+
+            if (!is_string($messageData['message'])) {
+                throw new InvalidArgumentException("Message is not a string for ID \"$messageId\".");
+            }
+
             if (!isset($sourceMessages[$messageId])) {
-                $result = $this->db->getSchema()->insert($this->sourceMessageTable, ['category' => $category, 'message_id' => $messageId]);
+                $comment = '';
+
+                if (array_key_exists('comment', $messageData)) {
+                    if (!is_string($messageData['comment'])) {
+                        throw new InvalidArgumentException("Message comment is not a string for ID \"$messageId\".");
+                    }
+                    $comment = $messageData['comment'];
+                }
+
+                $result = $this->db->getSchema()->insert(
+                    $this->sourceMessageTable,
+                    [
+                        'category' => $category,
+                        'message_id' => $messageId,
+                        'comment' => $comment,
+                    ],
+                );
                 if ($result === false) {
-                    throw new \RuntimeException('Can not create source message with id ' . $messageId);
+                    throw new \RuntimeException("Failed to write source message with \"$messageId\" ID.");
                 }
                 $sourceMessages[$messageId] = $result['id'];
             }
 
             $needUpdate = false;
-            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId] !== $translation) {
+            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId] !== $messageData) {
                 $this->db->createCommand()->delete($this->messageTable, ['id' => $sourceMessages[$messageId]])->execute();
                 $needUpdate = true;
             }
 
             if ($needUpdate || !isset($translatedMessages[$messageId])) {
-                $result = $this->db->getSchema()->insert($this->messageTable, ['id' => $sourceMessages[$messageId], 'locale' => $locale, 'translation' => $translation]);
+                $result = $this->db->getSchema()->insert($this->messageTable, ['id' => $sourceMessages[$messageId], 'locale' => $locale, 'translation' => $messageData['message']]);
                 if ($result === false) {
-                    throw new \RuntimeException('Can not create source message with id ' . $messageId);
+                    throw new \RuntimeException("Failed to write message with \"$messageId\" ID.");
                 }
             }
         }
