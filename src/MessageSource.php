@@ -128,7 +128,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                     [
                         'id' => $sourceMessages[$messageId],
                         'locale' => $locale,
-                        'translation' => $message->translation()
+                        'translation' => $message->translation(),
                     ]
                 );
                 if ($result === false) {
