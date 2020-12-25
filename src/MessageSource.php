@@ -10,6 +10,7 @@ use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Expression\Expression;
 use Yiisoft\Db\Query\Query;
+use Yiisoft\Translator\MessageInterface;
 use Yiisoft\Translator\MessageReaderInterface;
 use Yiisoft\Translator\MessageWriterInterface;
 use function array_key_exists;
@@ -78,6 +79,8 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
     public function write(string $category, string $locale, array $messages): void
     {
+        $this->validateMessages($messages);
+
         $sourceMessages = (new Query($this->db))
             ->select(['id', 'message_id'])
             ->from($this->sourceMessageTable)
@@ -88,23 +91,15 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
         $translatedMessages = $this->readFromDb($category, $locale);
 
-        foreach ($messages as $messageId => $messageData) {
-            if (!array_key_exists('message', $messageData)) {
-                throw new InvalidArgumentException("Message is not valid for ID \"$messageId\". \"message\" key is missing.");
-            }
-
-            if (!is_string($messageData['message'])) {
-                throw new InvalidArgumentException("Message is not a string for ID \"$messageId\".");
-            }
-
+        foreach ($messages as $messageId => $message) {
             if (!isset($sourceMessages[$messageId])) {
                 $comment = '';
 
-                if (array_key_exists('comment', $messageData)) {
-                    if (!is_string($messageData['comment'])) {
+                if (array_key_exists('comment', $message->meta())) {
+                    if (!is_string($message->meta()['comment'])) {
                         throw new InvalidArgumentException("Message comment is not a string for ID \"$messageId\".");
                     }
-                    $comment = $messageData['comment'];
+                    $comment = $message->meta()['comment'];
                 }
 
                 $result = $this->db->getSchema()->insert(
@@ -122,16 +117,33 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             }
 
             $needUpdate = false;
-            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId] !== $messageData) {
+            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId] !== $message->translation()) {
                 $this->db->createCommand()->delete($this->messageTable, ['id' => $sourceMessages[$messageId]])->execute();
                 $needUpdate = true;
             }
 
             if ($needUpdate || !isset($translatedMessages[$messageId])) {
-                $result = $this->db->getSchema()->insert($this->messageTable, ['id' => $sourceMessages[$messageId], 'locale' => $locale, 'translation' => $messageData['message']]);
+                $result = $this->db->getSchema()->insert(
+                    $this->messageTable,
+                    [
+                        'id' => $sourceMessages[$messageId],
+                        'locale' => $locale,
+                        'translation' => $message->translation()
+                    ]
+                );
                 if ($result === false) {
-                    throw new \RuntimeException("Failed to write message with \"$messageId\" ID.");
+                    throw new \RuntimeException("Failed to write a message with \"$messageId\" ID.");
                 }
+            }
+        }
+    }
+
+    private function validateMessages(array $messages): void
+    {
+        foreach ($messages as $key => $message) {
+            if (!$message instanceof MessageInterface) {
+                $realType = gettype($message);
+                throw new InvalidArgumentException("Messages should contain \"\Yiisoft\Translator\MessageInterface\" instances only. \"$realType\" given for \"$key\".");
             }
         }
     }
