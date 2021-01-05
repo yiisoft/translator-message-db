@@ -19,6 +19,8 @@ use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Sqlite\Connection;
 use Yiisoft\Di\Container;
 use Yiisoft\Factory\Definitions\Reference;
+use Yiisoft\Profiler\Profiler;
+use Yiisoft\Profiler\ProfilerInterface;
 use Yiisoft\Translator\Message\Db\MessageSource;
 use Yiisoft\Yii\Console\Application;
 use Yiisoft\Yii\Db\Migration\Command\DownCommand;
@@ -36,6 +38,7 @@ final class MessageSourceTest extends TestCase
     private ConsoleHelper $consoleHelper;
     private Migration $migration;
     private MigrationService $migrationService;
+    private ProfilerInterface $profiler;
 
     protected function setUp(): void
     {
@@ -157,6 +160,7 @@ final class MessageSourceTest extends TestCase
         $this->consoleHelper = $this->container->get(ConsoleHelper::class);
         $this->db = $this->container->get(ConnectionInterface::class);
         $this->cache = $this->container->get(CacheInterface::class);
+        $this->profiler = $this->container->get(ProfilerInterface::class);
         $this->migration = $this->container->get(Migration::class);
         $this->migrationService = $this->container->get(MigrationService::class);
 
@@ -185,6 +189,7 @@ final class MessageSourceTest extends TestCase
             ],
 
             LoggerInterface::class => NullLogger::class,
+            ProfilerInterface::class => Profiler::class,
 
             ConnectionInterface::class => [
                 '__class' => Connection::class,
