@@ -2,9 +2,10 @@
     <a href="https://github.com/yiisoft" target="_blank">
         <img src="https://github.com/yiisoft.png" height="100px">
     </a>
-    <h1 align="center">Yii translator DB message storage</h1>
-    <br>
 </p>
+<h1 align="center">Translator DB message storage</h1>
+
+The package provides message storage backend based on DB to be used with `yiisoft/translator` package.
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/translator-message-db/v/stable.png)](https://packagist.org/packages/yiisoft/translator-message-db)
 [![Total Downloads](https://poser.pugx.org/yiisoft/translator-message-db/downloads.png)](https://packagist.org/packages/yiisoft/translator-message-db)
@@ -15,21 +16,88 @@
 [![static analysis](https://github.com/yiisoft/translator-message-db/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/translator-message-db/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/translator-message-db/coverage.svg)](https://shepherd.dev/github/yiisoft/translator-message-db)
 
-The package ...
-
 ## Requirements
 
 - PHP 7.4 or higher.
 
 ## Installation
 
-The package could be installed with composer:
-
+The preferred way to install this package is through [Composer](https://getcomposer.org/download/):
+```bash
+composer require yiisoft/translator-message-db
 ```
-composer require yiisoft/translator-message-db --prefer-dist
+
+## Configuration
+
+### Quick start
+
+You need configurated database connection (for example usages [`yiisoft/db-sqlite`](https://github.com/yiisoft/db-sqlite)) and package [`yiisoft/yii-db-migration`](https://github.com/yiisoft/yii-db-migration)
+
+Add to `config/params.php`:
+```php
+...
+    'yiisoft/yii-db-migration' => [
+        'createNamespace' => 'Yiisoft\\Translator\\Message\\Db\\migrations',
+        'updateNamespace' => ['Yiisoft\\Translator\\Message\\Db\\migrations'],
+    ],
+...
+```
+and run this command in console for create tables for db storage:
+```shell
+vendor/bin/yii migrate/up
 ```
 
 ## General usage
+
+### Create of instance of MessageSource
+```php
+/** @var \Yiisoft\Db\Connection\ConnectionInterface $db */
+$messageSource = new \Yiisoft\Translator\Message\Db\MessageSource($db);
+```
+
+### Create of instance of MessageSource with caching
+```php
+/** @var \Yiisoft\Db\Connection\ConnectionInterface $db */
+/** @var \Yiisoft\Cache\CacheInterface $cache */
+$cacheDuration = 7200; // The TTL of this value. If set to null, default value is used - 3600
+$messageSource = new \Yiisoft\Translator\Message\Db\MessageSource($db, $cache, $cacheDuration);
+```
+
+### Read message without `yiisoft/translator` package
+```php
+/** 
+ * @var \Yiisoft\Translator\Message\Db\MessageSource $messageSource
+ * @var ?string $translatedString
+ */
+$id = 'messageIdentificator';
+$category = 'messageCategory';
+$language = 'de-DE';
+
+$translatedString = $messageSource->getMessage($id, $category, $language);
+```
+
+### Writing messages from array to storage
+```php
+/** 
+ * @var \Yiisoft\Translator\Message\Db\MessageSource $messageSource
+ */
+$category = 'messageCategory';
+$language = 'de-DE';
+$data = [
+    'test.id1' => [
+        'message' => 'Nachricht 1', // translated string
+        'comment' => 'Comment for message 1', // is optional parameter for save extra metadata
+    ],
+    'test.id2' => [
+        'message' => 'Nachricht 2',
+    ],
+    'test.id3' => [
+        'message' => 'Nachricht 3',
+    ],
+];
+
+$messageSource->write($category, $language, $data);
+```
 
 ### Unit testing
 
