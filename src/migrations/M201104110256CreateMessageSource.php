@@ -14,25 +14,18 @@ final class M201104110256CreateMessageSource extends Migration implements Revert
 {
     public function up(): void
     {
-        $tableOptions = null;
-
-        if ($this->db->getDriverName() === 'mysql') {
-            // http://stackoverflow.com/questions/766809/whats-the-difference-between-utf8-general-ci-and-utf8-unicode-ci
-            $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
-        }
-
         $this->createTable('{{%source_message}}', [
             'id' => $this->primaryKey(),
             'category' => $this->string(),
             'message_id' => $this->text(),
             'comment' => $this->text(),
-        ], $tableOptions);
+        ]);
 
         $this->createTable('{{%message}}', [
             'id' => $this->integer()->notNull(),
             'locale' => $this->string(16)->notNull(),
             'translation' => $this->text(),
-        ], $tableOptions);
+        ]);
 
         $this->addPrimaryKey('pk_message_id_locale', '{{%message}}', ['id', 'locale']);
         $onUpdateConstraint = 'RESTRICT';
