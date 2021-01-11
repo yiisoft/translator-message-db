@@ -17,8 +17,7 @@ final class M201104110256CreateMessageSource extends Migration implements Revert
         $tableOptions = null;
 
         if ($this->db->getDriverName() === 'mysql') {
-            // http://stackoverflow.com/questions/766809/whats-the-difference-between-utf8-general-ci-and-utf8-unicode-ci
-            $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
+            $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_bin ENGINE=InnoDB';
         }
 
         $this->createTable('{{%source_message}}', [
