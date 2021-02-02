@@ -21,8 +21,8 @@
     "prefer-stable": true,
     "require": {
         "php": "^7.4|^8.0",
-        "yiisoft/cache": "3.0.x-dev",
-        "yiisoft/arrays": "3.0.x-dev",
+        "yiisoft/cache": "^1.0",
+        "yiisoft/arrays": "^1.0",
         "yiisoft/db": "3.0.x-dev",
         "yiisoft/translator": "3.0.x-dev"
     },
