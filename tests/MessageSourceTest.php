@@ -26,6 +26,9 @@ use Yiisoft\Yii\Console\Application;
 use Yiisoft\Yii\Db\Migration\Command\DownCommand;
 use Yiisoft\Yii\Db\Migration\Command\UpdateCommand;
 use Yiisoft\Yii\Db\Migration\Helper\ConsoleHelper;
+use Yiisoft\Yii\Db\Migration\Informer\MigrationInformerInterface;
+use Yiisoft\Yii\Db\Migration\Informer\NullMigrationInformer;
+use Yiisoft\Yii\Db\Migration\Migrator;
 use Yiisoft\Yii\Db\Migration\Service\MigrationService;
 
 final class MessageSourceTest extends TestCase
@@ -36,7 +39,7 @@ final class MessageSourceTest extends TestCase
     private ?ConnectionInterface $db = null;
     private ?CacheInterface $cache = null;
     private ConsoleHelper $consoleHelper;
-    private Migration $migration;
+    private Migrator $migrator;
     private MigrationService $migrationService;
     private ProfilerInterface $profiler;
 
@@ -48,7 +51,6 @@ final class MessageSourceTest extends TestCase
 
         $this->migrationService->updateNamespace(['Yiisoft\\Translator\\Message\\Db\\migrations']);
         $this->consoleHelper->output()->setVerbosity(OutputInterface::VERBOSITY_QUIET);
-        $this->migrationService->compact(true);
 
         $create = $this->application->find('migrate/up');
         $commandUp = new CommandTester($create);
@@ -161,8 +163,9 @@ final class MessageSourceTest extends TestCase
         $this->db = $this->container->get(ConnectionInterface::class);
         $this->cache = $this->container->get(CacheInterface::class);
         $this->profiler = $this->container->get(ProfilerInterface::class);
-        $this->migration = $this->container->get(Migration::class);
+        $this->migrator = $this->container->get(Migrator::class);
         $this->migrationService = $this->container->get(MigrationService::class);
+
 
         $loader = new ContainerCommandLoader(
             $this->container,
@@ -197,6 +200,7 @@ final class MessageSourceTest extends TestCase
                     'dsn' => 'sqlite:' . __DIR__ . '/Data/yiitest.sq3',
                 ],
             ],
+            MigrationInformerInterface::class => NullMigrationInformer::class,
         ];
     }
 }
