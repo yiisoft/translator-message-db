@@ -30,6 +30,7 @@ use Yiisoft\Yii\Db\Migration\Informer\MigrationInformerInterface;
 use Yiisoft\Yii\Db\Migration\Informer\NullMigrationInformer;
 use Yiisoft\Yii\Db\Migration\Migrator;
 use Yiisoft\Yii\Db\Migration\Service\MigrationService;
+use InvalidArgumentException;
 
 final class MessageSourceTest extends TestCase
 {
@@ -102,6 +103,39 @@ final class MessageSourceTest extends TestCase
         ];
     }
 
+    public function generateFailTranslationsData(): array
+    {
+        return [
+            [
+                'app',
+                'de',
+                [
+                    'test.id1' => [
+                    ],
+                ],
+            ],
+            [
+                'app',
+                'de-DE',
+                [
+                    'test.id1' => [
+                        'message' => 1,
+                    ],
+                ],
+            ],
+            [
+                'app',
+                'de-DE',
+                [
+                    'test.id1' => [
+                        'message' => '',
+                        'comment' => 1,
+                    ],
+                ],
+            ],
+        ];
+    }
+
     /**
      * @dataProvider generateTranslationsData
      */
@@ -113,6 +147,16 @@ final class MessageSourceTest extends TestCase
         foreach ($data as $messageId => $messageData) {
             $this->assertEquals($messageData['message'], $messageSource->getMessage($messageId, $category, $locale));
         }
+    }
+
+    /**
+     * @dataProvider generateFailTranslationsData
+     */
+    public function testWriteWithFailData(string $category, string $locale, array $data): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $messageSource = new MessageSource($this->db);
+        $messageSource->write($category, $locale, $data);
     }
 
     public function testMultiWrite(): void
