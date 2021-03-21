@@ -44,7 +44,7 @@ Add to `config/params.php`:
 ```
 and run this command in console for create tables for db storage:
 ```shell
-vendor/bin/yii migrate/up
+./yii migrate/up
 ```
 
 ## General usage
