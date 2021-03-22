@@ -178,6 +178,54 @@ final class MessageSourceTest extends TestCase
         }
     }
 
+    public function testUpdate(): void
+    {
+        $updatedData = [
+            'app',
+            'de',
+            [
+                'test.id1' => [
+                    'message' => 'Need to update',
+                ],
+                'test.id2' => [
+                    'message' => 'app: Test 2 on the (de-DE)',
+                ],
+            ],
+        ];
+
+        $allData = [
+            [
+                'app',
+                'de',
+                [
+                    'test.id1' => [
+                        'comment' => 'Translate wisely!',
+                        'message' => 'app: Test 1 on the (de)',
+                    ],
+                    'test.id2' => [
+                        'message' => 'app: Test 2 on the (de)',
+                    ],
+                    'test.id3' => [
+                        'message' => 'app: Test 3 on the (de)',
+                    ],
+                ],
+            ],
+            $updatedData,
+        ];
+
+        $messageSource = new MessageSource($this->db);
+
+        foreach ($allData as $fileData) {
+            [$category, $locale, $data] = $fileData;
+            $messageSource->write($category, $locale, $data);
+        }
+
+        [$category, $locale, $data] = $updatedData;
+        foreach ($data as $messageId => $messageData) {
+            $this->assertEquals($messageData['message'], $messageSource->getMessage($messageId, $category, $locale));
+        }
+    }
+
     public function testMultiWriteWithCache(): void
     {
         $allData = $this->generateTranslationsData();

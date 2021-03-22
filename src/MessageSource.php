@@ -17,6 +17,7 @@ use function is_string;
 
 final class MessageSource implements MessageReaderInterface, MessageWriterInterface
 {
+    /** @psalm-var array<string, array<string, array<string, string>>>  */
     private array $messages = [];
     private ConnectionInterface $db;
     private string $sourceMessageTable = '{{%source_message}}';
@@ -41,9 +42,11 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         return $this->messages[$category][$locale][$id] ?? null;
     }
 
+    /** @psalm-return array<string,string> */
     private function read(string $category, string $locale): array
     {
         if ($this->cache !== null) {
+            /** @psalm-var array<string,string> */
             return $this->cache->getOrSet(
                 $this->getCacheKey($category, $locale),
                 function () use ($category, $locale) {
@@ -56,6 +59,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         return $this->readFromDb($category, $locale);
     }
 
+    /** @psalm-return array<string, string> */
     private function readFromDb(string $category, string $locale): array
     {
         $query = (new Query($this->db))
@@ -71,13 +75,19 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             ->where([
                 'locale' => $locale,
             ]);
+        /** @psalm-var array<array-key, array<string, string>>*/
         $messages = $query->all();
 
+        /** @psalm-var  array<string, string> */
         return ArrayHelper::map($messages, 'message_id', 'translation');
     }
 
+    /**
+     * @psalm-param array<string, array<string, string>> $messages
+     */
     public function write(string $category, string $locale, array $messages): void
     {
+        /** @psalm-var array<array-key, array<string, string>> $sourceMessages */
         $sourceMessages = (new Query($this->db))
             ->select(['id', 'message_id'])
             ->from($this->sourceMessageTable)
@@ -93,10 +103,12 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                 throw new InvalidArgumentException("Message is not valid for ID \"$messageId\". \"message\" key is missing.");
             }
 
+            /** @psalm-suppress DocblockTypeContradiction */
             if (!is_string($messageData['message'])) {
                 throw new InvalidArgumentException("Message is not a string for ID \"$messageId\".");
             }
 
+            /** @psalm-suppress DocblockTypeContradiction */
             if (!isset($sourceMessages[$messageId])) {
                 $comment = '';
 
@@ -118,11 +130,12 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                 if ($result === false) {
                     throw new \RuntimeException("Failed to write source message with \"$messageId\" ID.");
                 }
+                /** @psalm-var string */
                 $sourceMessages[$messageId] = $result['id'];
             }
 
             $needUpdate = false;
-            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId] !== $messageData) {
+            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId] !== $messageData['message']) {
                 $this->db->createCommand()->delete($this->messageTable, ['id' => $sourceMessages[$messageId]])->execute();
                 $needUpdate = true;
             }
