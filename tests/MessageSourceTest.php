@@ -199,8 +199,8 @@ final class MessageSourceTest extends TestCase
                 'de',
                 [
                     'test.id1' => [
-                        'comment' => 'Translate wisely!',
                         'message' => 'app: Test 1 on the (de)',
+                        'comment' => 'Translate wisely!',
                     ],
                     'test.id2' => [
                         'message' => 'app: Test 2 on the (de)',
@@ -294,5 +294,18 @@ final class MessageSourceTest extends TestCase
             ],
             MigrationInformerInterface::class => NullMigrationInformer::class,
         ];
+    }
+
+
+    /**
+     * @dataProvider generateTranslationsData
+     */
+    public function testReadMessages(string $category, string $locale, array $data): void
+    {
+        $messageSource = new MessageSource($this->db);
+        $messageSource->write($category, $locale, $data);
+
+        $messages = $messageSource->getMessages($category, $locale);
+        $this->assertEquals($messages, $data);
     }
 }
