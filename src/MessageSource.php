@@ -17,7 +17,7 @@ use function is_string;
 
 final class MessageSource implements MessageReaderInterface, MessageWriterInterface
 {
-    /** @psalm-var array<string, array<string, array<string, string>>>  */
+    /** @psalm-var array<string, array<string, array<string, array<string, string>>>>  */
     private array $messages = [];
     private ConnectionInterface $db;
     private string $sourceMessageTable = '{{%source_message}}';
@@ -39,14 +39,23 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             $this->messages[$category][$locale] = $this->read($category, $locale);
         }
 
-        return $this->messages[$category][$locale][$id] ?? null;
+        return $this->messages[$category][$locale][$id]['message'] ?? null;
     }
 
-    /** @psalm-return array<string,string> */
+    public function getMessages(string $category, string $locale): array
+    {
+        if (!isset($this->messages[$category][$locale])) {
+            $this->messages[$category][$locale] = $this->read($category, $locale);
+        }
+
+        return $this->messages[$category][$locale] ?? [];
+    }
+
+    /** @psalm-return array<string, array<string, string>> */
     private function read(string $category, string $locale): array
     {
         if ($this->cache !== null) {
-            /** @psalm-var array<string,string> */
+            /** @psalm-var array<string, array<string, string>> */
             return $this->cache->getOrSet(
                 $this->getCacheKey($category, $locale),
                 function () use ($category, $locale) {
@@ -59,11 +68,11 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         return $this->readFromDb($category, $locale);
     }
 
-    /** @psalm-return array<string, string> */
+    /** @psalm-return array<string, array<string, string>> */
     private function readFromDb(string $category, string $locale): array
     {
         $query = (new Query($this->db))
-            ->select(['message_id', 'translation'])
+            ->select(['message_id', 'translation', 'comment'])
             ->from(['ts' => $this->sourceMessageTable])
             ->innerJoin(
                 ['td' => $this->messageTable],
@@ -78,8 +87,10 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         /** @psalm-var array<array-key, array<string, string>>*/
         $messages = $query->all();
 
-        /** @psalm-var  array<string, string> */
-        return ArrayHelper::map($messages, 'message_id', 'translation');
+        /** @psalm-var array<string, array<string, string>> */
+        return ArrayHelper::map($messages, 'message_id', function (array $message): array {
+            return array_merge(['message' => $message['translation']], !empty($message['comment']) ? ['comment' => $message['comment']] : []);
+        });
     }
 
     /**
@@ -135,7 +146,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             }
 
             $needUpdate = false;
-            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId] !== $messageData['message']) {
+            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId]['message'] !== $messageData['message']) {
                 $this->db->createCommand()->delete($this->messageTable, ['id' => $sourceMessages[$messageId]])->execute();
                 $needUpdate = true;
             }
