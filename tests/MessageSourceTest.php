@@ -296,7 +296,6 @@ final class MessageSourceTest extends TestCase
         ];
     }
 
-
     /**
      * @dataProvider generateTranslationsData
      */
