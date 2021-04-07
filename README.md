@@ -23,6 +23,7 @@ The package provides message storage backend based on DB to be used with `yiisof
 ## Installation
 
 The preferred way to install this package is through [Composer](https://getcomposer.org/download/):
+
 ```bash
 composer require yiisoft/translator-message-db
 ```
@@ -31,18 +32,20 @@ composer require yiisoft/translator-message-db
 
 ### Quick start
 
-You need configurated database connection (for example usages [`yiisoft/db-sqlite`](https://github.com/yiisoft/db-sqlite)) and package [`yiisoft/yii-db-migration`](https://github.com/yiisoft/yii-db-migration)
+You need a configured database connection (for example using [`yiisoft/db-sqlite`](https://github.com/yiisoft/db-sqlite))
+and [`yiisoft/yii-db-migration`](https://github.com/yiisoft/yii-db-migration) package.
 
 Add to `config/params.php`:
 ```php
 ...
     'yiisoft/yii-db-migration' => [
-        'createNamespace' => 'Yiisoft\\Translator\\Message\\Db\\migrations',
         'updateNamespace' => ['Yiisoft\\Translator\\Message\\Db\\migrations'],
     ],
 ...
 ```
-and run this command in console for create tables for db storage:
+
+and run the following command in console for create tables for db storage:
+
 ```shell
 ./yii migrate/up
 ```
@@ -50,12 +53,14 @@ and run this command in console for create tables for db storage:
 ## General usage
 
 ### Create of instance of MessageSource
+
 ```php
 /** @var \Yiisoft\Db\Connection\ConnectionInterface $db */
 $messageSource = new \Yiisoft\Translator\Message\Db\MessageSource($db);
 ```
 
 ### Create of instance of MessageSource with caching
+
 ```php
 /** @var \Yiisoft\Db\Connection\ConnectionInterface $db */
 /** @var \Yiisoft\Cache\CacheInterface $cache */
@@ -64,6 +69,7 @@ $messageSource = new \Yiisoft\Translator\Message\Db\MessageSource($db, $cache, $
 ```
 
 ### Read message without `yiisoft/translator` package
+
 ```php
 /** 
  * @var \Yiisoft\Translator\Message\Db\MessageSource $messageSource
@@ -77,6 +83,7 @@ $translatedString = $messageSource->getMessage($id, $category, $language);
 ```
 
 ### Writing messages from array to storage
+
 ```php
 /** 
  * @var \Yiisoft\Translator\Message\Db\MessageSource $messageSource
