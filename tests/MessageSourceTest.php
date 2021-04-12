@@ -279,7 +279,7 @@ final class MessageSourceTest extends TestCase
             ],
 
             CacheInterface::class => [
-                '__class' => Cache::class,
+                'class' => Cache::class,
                 '__construct()' => [Reference::to(ArrayCache::class)],
             ],
 
@@ -287,7 +287,7 @@ final class MessageSourceTest extends TestCase
             ProfilerInterface::class => Profiler::class,
 
             ConnectionInterface::class => [
-                '__class' => Connection::class,
+                'class' => Connection::class,
                 '__construct()' => [
                     'dsn' => 'sqlite:' . __DIR__ . '/Data/yiitest.sq3',
                 ],
