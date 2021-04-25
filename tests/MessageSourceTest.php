@@ -50,7 +50,7 @@ final class MessageSourceTest extends TestCase
 
         $this->configContainer();
 
-        $this->migrationService->updateNamespace(['Yiisoft\\Translator\\Message\\Db\\migrations']);
+        $this->migrationService->updateNamespaces(['Yiisoft\\Translator\\Message\\Db\\migrations']);
         $this->consoleHelper->output()->setVerbosity(OutputInterface::VERBOSITY_QUIET);
 
         $create = $this->application->find('migrate/up');
@@ -251,13 +251,15 @@ final class MessageSourceTest extends TestCase
 
         $this->application = $this->container->get(Application::class);
         $this->aliases = $this->container->get(Aliases::class);
+        $this->aliases->set('@root', dirname(__DIR__, 1));
+        $this->aliases->set('@yiisoft/yii/db/migration', dirname(__DIR__, 1));
+
         $this->consoleHelper = $this->container->get(ConsoleHelper::class);
         $this->db = $this->container->get(ConnectionInterface::class);
         $this->cache = $this->container->get(CacheInterface::class);
         $this->profiler = $this->container->get(ProfilerInterface::class);
         $this->migrator = $this->container->get(Migrator::class);
         $this->migrationService = $this->container->get(MigrationService::class);
-
 
         $loader = new ContainerCommandLoader(
             $this->container,
@@ -274,8 +276,7 @@ final class MessageSourceTest extends TestCase
     {
         return [
             Aliases::class => [
-                '@root' => dirname(__DIR__, 1),
-                '@yiisoft/yii/db/migration' => dirname(__DIR__, 1),
+                'class' => Aliases::class,
             ],
 
             CacheInterface::class => [

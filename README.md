@@ -50,7 +50,7 @@ and run the following command in console for create tables for db storage:
 ./yii migrate/up
 ```
 
-**Step 2.** Example of config, if you not use package [`yiisoft/config`](http://github.com/yiisoft/config)
+**Step 2.** In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically. If not, the following DI container configuration is necessary:
 
 ```php
 <?php
