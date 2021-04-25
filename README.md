@@ -32,7 +32,7 @@ composer require yiisoft/translator-message-db
 
 ### Quick start
 
-You need a configured database connection (for example using [`yiisoft/db-sqlite`](https://github.com/yiisoft/db-sqlite))
+**Step 1.** You need a configured database connection (for example using [`yiisoft/db-sqlite`](https://github.com/yiisoft/db-sqlite))
 and [`yiisoft/yii-db-migration`](https://github.com/yiisoft/yii-db-migration) package.
 
 Add to `config/params.php`:
@@ -48,6 +48,23 @@ and run the following command in console for create tables for db storage:
 
 ```shell
 ./yii migrate/up
+```
+
+**Step 2.** In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically. If not, the following DI container configuration is necessary:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Yiisoft\Translator\MessageReaderInterface;
+use Yiisoft\Translator\Message\Db\MessageSource;
+
+return [
+    MessageReaderInterface::class => [
+        'class' => MessageSource::class,
+    ],
+];
 ```
 
 ## General usage
