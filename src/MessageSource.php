@@ -51,48 +51,6 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         return $this->messages[$category][$locale] ?? [];
     }
 
-    /** @psalm-return array<string, array<string, string>> */
-    private function read(string $category, string $locale): array
-    {
-        if ($this->cache !== null) {
-            /** @psalm-var array<string, array<string, string>> */
-            return $this->cache->getOrSet(
-                $this->getCacheKey($category, $locale),
-                function () use ($category, $locale) {
-                    return $this->readFromDb($category, $locale);
-                },
-                $this->cachingDuration
-            );
-        }
-
-        return $this->readFromDb($category, $locale);
-    }
-
-    /** @psalm-return array<string, array<string, string>> */
-    private function readFromDb(string $category, string $locale): array
-    {
-        $query = (new Query($this->db))
-            ->select(['message_id', 'translation', 'comment'])
-            ->from(['ts' => $this->sourceMessageTable])
-            ->innerJoin(
-                ['td' => $this->messageTable],
-                [
-                    'td.id' => new Expression('[[ts.id]]'),
-                    'ts.category' => $category,
-                ]
-            )
-            ->where([
-                'locale' => $locale,
-            ]);
-        /** @psalm-var array<array-key, array<string, string>>*/
-        $messages = $query->all();
-
-        /** @psalm-var array<string, array<string, string>> */
-        return ArrayHelper::map($messages, 'message_id', function (array $message): array {
-            return array_merge(['message' => $message['translation']], !empty($message['comment']) ? ['comment' => $message['comment']] : []);
-        });
-    }
-
     /**
      * @psalm-param array<string, array<string, string>> $messages
      */
@@ -158,6 +116,48 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                 }
             }
         }
+    }
+
+    /** @psalm-return array<string, array<string, string>> */
+    private function read(string $category, string $locale): array
+    {
+        if ($this->cache !== null) {
+            /** @psalm-var array<string, array<string, string>> */
+            return $this->cache->getOrSet(
+                $this->getCacheKey($category, $locale),
+                function () use ($category, $locale) {
+                    return $this->readFromDb($category, $locale);
+                },
+                $this->cachingDuration
+            );
+        }
+
+        return $this->readFromDb($category, $locale);
+    }
+
+    /** @psalm-return array<string, array<string, string>> */
+    private function readFromDb(string $category, string $locale): array
+    {
+        $query = (new Query($this->db))
+            ->select(['message_id', 'translation', 'comment'])
+            ->from(['ts' => $this->sourceMessageTable])
+            ->innerJoin(
+                ['td' => $this->messageTable],
+                [
+                    'td.id' => new Expression('[[ts.id]]'),
+                    'ts.category' => $category,
+                ]
+            )
+            ->where([
+                'locale' => $locale,
+            ]);
+        /** @psalm-var array<array-key, array<string, string>>*/
+        $messages = $query->all();
+
+        /** @psalm-var array<string, array<string, string>> */
+        return ArrayHelper::map($messages, 'message_id', function (array $message): array {
+            return array_merge(['message' => $message['translation']], !empty($message['comment']) ? ['comment' => $message['comment']] : []);
+        });
     }
 
     private function getCacheKey(string $category, string $locale): string
