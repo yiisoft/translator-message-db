@@ -16,7 +16,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="Yii DB message storage tests">
+        <testsuite name="Yii Translator DB Message Storage tests">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
