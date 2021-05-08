@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Translator\Message\Db;
 
 use InvalidArgumentException;
+use RuntimeException;
 use Yiisoft\Arrays\ArrayHelper;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
@@ -12,6 +13,7 @@ use Yiisoft\Db\Expression\Expression;
 use Yiisoft\Db\Query\Query;
 use Yiisoft\Translator\MessageReaderInterface;
 use Yiisoft\Translator\MessageWriterInterface;
+
 use function array_key_exists;
 use function is_string;
 
@@ -97,7 +99,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                     ],
                 );
                 if ($result === false) {
-                    throw new \RuntimeException("Failed to write source message with \"$messageId\" ID.");
+                    throw new RuntimeException("Failed to write source message with \"$messageId\" ID.");
                 }
                 /** @psalm-var string */
                 $sourceMessages[$messageId] = $result['id'];
@@ -112,7 +114,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             if ($needUpdate || !isset($translatedMessages[$messageId])) {
                 $result = $this->db->getSchema()->insert($this->messageTable, ['id' => $sourceMessages[$messageId], 'locale' => $locale, 'translation' => $messageData['message']]);
                 if ($result === false) {
-                    throw new \RuntimeException("Failed to write message with \"$messageId\" ID.");
+                    throw new RuntimeException("Failed to write message with \"$messageId\" ID.");
                 }
             }
         }
