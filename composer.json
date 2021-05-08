@@ -1,7 +1,7 @@
 {
     "name": "yiisoft/translator-message-db",
     "type": "library",
-    "description": "Yii DB message storage",
+    "description": "Yii Translator DB Message Storage",
     "keywords": [
         "i18n",
         "internationalization",
