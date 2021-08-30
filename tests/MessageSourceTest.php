@@ -18,7 +18,7 @@ use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Sqlite\Connection;
 use Yiisoft\Di\Container;
-use Yiisoft\Factory\Definition\Reference;
+use Yiisoft\Definitions\Reference;
 use Yiisoft\Profiler\Profiler;
 use Yiisoft\Profiler\ProfilerInterface;
 use Yiisoft\Translator\Message\Db\MessageSource;
