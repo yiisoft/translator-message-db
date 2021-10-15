@@ -9,7 +9,6 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Cache\ArrayCache;
@@ -25,10 +24,8 @@ use Yiisoft\Translator\Message\Db\MessageSource;
 use Yiisoft\Yii\Console\Application;
 use Yiisoft\Yii\Db\Migration\Command\DownCommand;
 use Yiisoft\Yii\Db\Migration\Command\UpdateCommand;
-use Yiisoft\Yii\Db\Migration\Helper\ConsoleHelper;
 use Yiisoft\Yii\Db\Migration\Informer\MigrationInformerInterface;
 use Yiisoft\Yii\Db\Migration\Informer\NullMigrationInformer;
-use Yiisoft\Yii\Db\Migration\Migrator;
 use Yiisoft\Yii\Db\Migration\Service\MigrationService;
 use InvalidArgumentException;
 
@@ -39,10 +36,7 @@ final class MessageSourceTest extends TestCase
     private Aliases $aliases;
     private ?ConnectionInterface $db = null;
     private ?CacheInterface $cache = null;
-    private ConsoleHelper $consoleHelper;
-    private Migrator $migrator;
     private MigrationService $migrationService;
-    private ProfilerInterface $profiler;
 
     protected function setUp(): void
     {
@@ -51,7 +45,6 @@ final class MessageSourceTest extends TestCase
         $this->configContainer();
 
         $this->migrationService->updateNamespaces(['Yiisoft\\Translator\\Message\\Db\\migrations']);
-        $this->consoleHelper->output()->setVerbosity(OutputInterface::VERBOSITY_QUIET);
 
         $create = $this->application->find('migrate/up');
         $commandUp = new CommandTester($create);
@@ -254,11 +247,8 @@ final class MessageSourceTest extends TestCase
         $this->aliases->set('@root', dirname(__DIR__, 1));
         $this->aliases->set('@yiisoft/yii/db/migration', dirname(__DIR__, 1));
 
-        $this->consoleHelper = $this->container->get(ConsoleHelper::class);
         $this->db = $this->container->get(ConnectionInterface::class);
         $this->cache = $this->container->get(CacheInterface::class);
-        $this->profiler = $this->container->get(ProfilerInterface::class);
-        $this->migrator = $this->container->get(Migrator::class);
         $this->migrationService = $this->container->get(MigrationService::class);
 
         $loader = new ContainerCommandLoader(
