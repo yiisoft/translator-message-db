@@ -23,7 +23,7 @@
         "php": "^7.4|^8.0",
         "ext-json": "*",
         "yiisoft/cache": "^1.0",
-        "yiisoft/arrays": "^1.0",
+        "yiisoft/arrays": "^2.0",
         "yiisoft/db": "3.0.x-dev",
         "yiisoft/translator": "^1.0"
     },
@@ -34,6 +34,7 @@
         "vimeo/psalm": "^4.2",
         "yiisoft/di": "^3.0@dev",
         "yiisoft/db-sqlite": "3.0.x-dev",
+        "yiisoft/psr-dummy-provider": "^1.0",
         "yiisoft/yii-db-migration": "1.0.x-dev"
     },
     "autoload": {
