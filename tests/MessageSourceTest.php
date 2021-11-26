@@ -18,6 +18,7 @@ use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Sqlite\Connection;
 use Yiisoft\Di\Container;
 use Yiisoft\Definitions\Reference;
+use Yiisoft\Di\ContainerConfig;
 use Yiisoft\Profiler\Profiler;
 use Yiisoft\Profiler\ProfilerInterface;
 use Yiisoft\Translator\Message\Db\MessageSource;
@@ -240,7 +241,9 @@ final class MessageSourceTest extends TestCase
 
     protected function configContainer(): void
     {
-        $this->container = new Container($this->config());
+        $config = ContainerConfig::create()
+            ->withDefinitions($this->getDefinitions());
+        $this->container = new Container($config);
 
         $this->application = $this->container->get(Application::class);
         $this->aliases = $this->container->get(Aliases::class);
@@ -262,7 +265,7 @@ final class MessageSourceTest extends TestCase
         $this->application->setCommandLoader($loader);
     }
 
-    private function config(): array
+    private function getDefinitions(): array
     {
         return [
             Aliases::class => [
