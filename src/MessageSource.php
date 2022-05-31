@@ -93,14 +93,16 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                 }
 
                 /** @psalm-var array<string,string>|false */
-                $result = $this->db->getSchema()->insert(
-                    $this->sourceMessageTable,
-                    [
-                        'category' => $category,
-                        'message_id' => $messageId,
-                        'comment' => $comment,
-                    ],
-                );
+                $result = $this->db
+                    ->getSchema()
+                    ->insert(
+                        $this->sourceMessageTable,
+                        [
+                            'category' => $category,
+                            'message_id' => $messageId,
+                            'comment' => $comment,
+                        ],
+                    );
                 if ($result === false) {
                     throw new RuntimeException("Failed to write source message with \"$messageId\" ID.");
                 }
@@ -110,19 +112,24 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
             $needUpdate = false;
             if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId]['message'] !== $messageData['message']) {
-                $this->db->createCommand()->delete($this->messageTable, ['id' => $sourceMessages[$messageId]])->execute();
+                $this->db
+                    ->createCommand()
+                    ->delete($this->messageTable, ['id' => $sourceMessages[$messageId]])
+                    ->execute();
                 $needUpdate = true;
             }
 
             if ($needUpdate || !isset($translatedMessages[$messageId])) {
-                $result = $this->db->getSchema()->insert(
-                    $this->messageTable,
-                    [
-                        'id' => $sourceMessages[$messageId],
-                        'locale' => $locale,
-                        'translation' => $messageData['message'],
-                    ]
-                );
+                $result = $this->db
+                    ->getSchema()
+                    ->insert(
+                        $this->messageTable,
+                        [
+                            'id' => $sourceMessages[$messageId],
+                            'locale' => $locale,
+                            'translation' => $messageData['message'],
+                        ]
+                    );
                 if ($result === false) {
                     throw new RuntimeException("Failed to write message with \"$messageId\" ID.");
                 }
