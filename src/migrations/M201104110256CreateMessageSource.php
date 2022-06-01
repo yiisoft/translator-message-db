@@ -16,7 +16,9 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
     {
         $tableOptions = null;
 
-        if ($b->getDb()->getDriverName() === 'mysql') {
+        if ($b
+                ->getDb()
+                ->getDriverName() === 'mysql') {
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_bin ENGINE=InnoDB';
         }
 
@@ -28,14 +30,20 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
         ], $tableOptions);
 
         $b->createTable('{{%message}}', [
-            'id' => $b->integer()->notNull(),
-            'locale' => $b->string(16)->notNull(),
+            'id' => $b
+                ->integer()
+                ->notNull(),
+            'locale' => $b
+                ->string(16)
+                ->notNull(),
             'translation' => $b->text(),
         ], $tableOptions);
 
         $b->addPrimaryKey('pk_message_id_locale', '{{%message}}', ['id', 'locale']);
         $onUpdateConstraint = 'RESTRICT';
-        if ($b->getDb()->getDriverName() === 'sqlsrv') {
+        if ($b
+                ->getDb()
+                ->getDriverName() === 'sqlsrv') {
             // 'NO ACTION' is equivalent to 'RESTRICT' in MSSQL
             $onUpdateConstraint = 'NO ACTION';
         }
