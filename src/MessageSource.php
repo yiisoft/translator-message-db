@@ -27,7 +27,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
     private string $messageTable = '{{%message}}';
     private int $cachingDuration = 3600;
 
-    public function __construct(private ConnectionInterface $db, private ?\Yiisoft\Cache\CacheInterface $cache = null, ?int $cacheDuration = null)
+    public function __construct(private ConnectionInterface $db, private ?CacheInterface $cache = null, ?int $cacheDuration = null)
     {
         $this->cachingDuration = $cacheDuration ?? $this->cachingDuration;
     }
@@ -141,7 +141,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             /** @psalm-var array<string, array<string, string>> */
             return $this->cache->getOrSet(
                 $this->getCacheKey($category, $locale),
-                fn() => $this->readFromDb($category, $locale),
+                fn () => $this->readFromDb($category, $locale),
                 $this->cachingDuration
             );
         }
@@ -171,7 +171,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         $messages = $query->all();
 
         /** @psalm-var array<string, array<string, string>> */
-        return ArrayHelper::map($messages, 'message_id', static fn(array $message): array => array_merge(
+        return ArrayHelper::map($messages, 'message_id', static fn (array $message): array => array_merge(
             ['message' => $message['translation']],
             !empty($message['comment']) ? ['comment' => $message['comment']] : []
         ));
