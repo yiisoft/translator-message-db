@@ -24,7 +24,7 @@
         "php": "^7.4|^8.0",
         "ext-json": "*",
         "yiisoft/cache": "^1.0",
-        "yiisoft/arrays": "^2.0",
+        "yiisoft/arrays": "^2.0|^3.0",
         "yiisoft/db": "3.0.x-dev",
         "yiisoft/translator": "^1.0"
     },
