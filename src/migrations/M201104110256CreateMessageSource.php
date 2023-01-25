@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Translator\Message\Db\migrations;
+namespace Yiisoft\Translator\Message\Db\Migrations;
 
+use Yiisoft\Db\Exception\InvalidConfigException;
+use Yiisoft\Db\Exception\NotSupportedException;
 use Yiisoft\Yii\Db\Migration\MigrationBuilder;
 use Yiisoft\Yii\Db\Migration\RevertibleMigrationInterface;
 
@@ -12,6 +14,10 @@ use Yiisoft\Yii\Db\Migration\RevertibleMigrationInterface;
  */
 final class M201104110256CreateMessageSource implements RevertibleMigrationInterface
 {
+    /**
+     * @throws InvalidConfigException
+     * @throws NotSupportedException
+     */
     public function up(MigrationBuilder $b): void
     {
         $tableOptions = null;
@@ -28,12 +34,8 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
         ], $tableOptions);
 
         $b->createTable('{{%message}}', [
-            'id' => $b
-                ->integer()
-                ->notNull(),
-            'locale' => $b
-                ->string(16)
-                ->notNull(),
+            'id' => $b->integer()->notNull(),
+            'locale' => $b->string(16)->notNull(),
             'translation' => $b->text(),
         ], $tableOptions);
 
@@ -45,11 +47,23 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
             $onUpdateConstraint = 'NO ACTION';
         }
 
-        $b->addForeignKey('fk_message_source_message', '{{%message}}', 'id', '{{%source_message}}', 'id', 'CASCADE', $onUpdateConstraint);
+        $b->addForeignKey(
+            'fk_message_source_message',
+            '{{%message}}',
+            'id',
+            '{{%source_message}}',
+            'id',
+            'CASCADE',
+            $onUpdateConstraint
+        );
         $b->createIndex('idx_source_message_category', '{{%source_message}}', 'category');
         $b->createIndex('idx_message_locale', '{{%message}}', 'locale');
     }
 
+    /**
+     * @throws InvalidConfigException
+     * @throws NotSupportedException
+     */
     public function down(MigrationBuilder $b): void
     {
         $b->dropForeignKey('fk_message_source_message', '{{%message}}');
