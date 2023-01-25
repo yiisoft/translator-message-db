@@ -72,7 +72,7 @@ trait MysqlHelper
 
         $create = $this->application->find('migrate/up');
         $commandUp = new CommandTester($create);
-        $command->setInputs(['yes']);
+        $commandUp->setInputs(['yes']);
         $commandUp->execute([]);
     }
 
