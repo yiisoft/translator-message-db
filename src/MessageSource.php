@@ -94,8 +94,8 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
                 /** @psalm-var array<string,string>|false */
                 $result = $this->db
-                    ->getSchema()
-                    ->insert(
+                    ->createCommand()
+                    ->insertWithReturningPks(
                         $this->sourceMessageTable,
                         [
                             'category' => $category,
@@ -103,6 +103,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                             'comment' => $comment,
                         ],
                     );
+
                 if ($result === false) {
                     throw new RuntimeException("Failed to write source message with \"$messageId\" ID.");
                 }
@@ -121,8 +122,8 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
             if ($needUpdate || !isset($translatedMessages[$messageId])) {
                 $result = $this->db
-                    ->getSchema()
-                    ->insert(
+                    ->createCommand()
+                    ->insertWithReturningPks(
                         $this->messageTable,
                         [
                             'id' => $sourceMessages[$messageId],
@@ -130,6 +131,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                             'translation' => $messageData['message'],
                         ]
                     );
+
                 if ($result === false) {
                     throw new RuntimeException("Failed to write message with \"$messageId\" ID.");
                 }

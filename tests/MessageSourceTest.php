@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db\Tests;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -15,9 +16,11 @@ use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
-use Yiisoft\Db\Sqlite\Connection;
-use Yiisoft\Di\Container;
+use Yiisoft\Db\Mysql\ConnectionPDO;
+use Yiisoft\Db\Mysql\Dsn;
+use Yiisoft\Db\Mysql\PDODriver;
 use Yiisoft\Definitions\Reference;
+use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
 use Yiisoft\Profiler\Profiler;
 use Yiisoft\Profiler\ProfilerInterface;
@@ -28,7 +31,6 @@ use Yiisoft\Yii\Db\Migration\Command\UpdateCommand;
 use Yiisoft\Yii\Db\Migration\Informer\MigrationInformerInterface;
 use Yiisoft\Yii\Db\Migration\Informer\NullMigrationInformer;
 use Yiisoft\Yii\Db\Migration\Service\MigrationService;
-use InvalidArgumentException;
 
 final class MessageSourceTest extends TestCase
 {
@@ -281,9 +283,13 @@ final class MessageSourceTest extends TestCase
             ProfilerInterface::class => Profiler::class,
 
             ConnectionInterface::class => [
-                'class' => Connection::class,
+                'class' => ConnectionPDO::class,
                 '__construct()' => [
-                    'dsn' => 'sqlite:' . __DIR__ . '/Data/yiitest.sq3',
+                    new PDODriver(
+                        (new Dsn('mysql', '127.0.0.1', 'yiitest', '3306', ['charset' => 'utf8mb4']))->asString(),
+                        'root',
+                        '',
+                    ),
                 ],
             ],
             MigrationInformerInterface::class => NullMigrationInformer::class,

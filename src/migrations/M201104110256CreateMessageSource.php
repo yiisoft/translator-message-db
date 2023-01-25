@@ -16,9 +16,7 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
     {
         $tableOptions = null;
 
-        if ($b
-                ->getDb()
-                ->getDriverName() === 'mysql') {
+        if ($b->getDb()->getName() === 'mysql') {
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_bin ENGINE=InnoDB';
         }
 
@@ -41,12 +39,12 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
 
         $b->addPrimaryKey('pk_message_id_locale', '{{%message}}', ['id', 'locale']);
         $onUpdateConstraint = 'RESTRICT';
-        if ($b
-                ->getDb()
-                ->getDriverName() === 'sqlsrv') {
+
+        if ($b->getDb()->getName() === 'sqlsrv') {
             // 'NO ACTION' is equivalent to 'RESTRICT' in MSSQL
             $onUpdateConstraint = 'NO ACTION';
         }
+
         $b->addForeignKey('fk_message_source_message', '{{%message}}', 'id', '{{%source_message}}', 'id', 'CASCADE', $onUpdateConstraint);
         $b->createIndex('idx_source_message_category', '{{%source_message}}', 'category');
         $b->createIndex('idx_message_locale', '{{%message}}', 'locale');
