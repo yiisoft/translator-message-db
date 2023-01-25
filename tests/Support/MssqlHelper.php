@@ -72,7 +72,6 @@ trait MssqlHelper
 
         $create = $this->application->find('migrate/up');
         $commandUp = new CommandTester($create);
-        $commandUp->setInputs(['yes']);
         $commandUp->execute([]);
     }
 
