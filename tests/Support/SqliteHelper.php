@@ -68,7 +68,7 @@ trait SqliteHelper
         );
 
         $this->application->setCommandLoader($loader);
-        $this->migrationService->updateNamespaces(['Yiisoft\\Translator\\Message\\Db\\Migrations\\Sqlite']);
+        $this->migrationService->updateNamespaces(['Yiisoft\\Translator\\Message\\Db\\Migrations']);
 
         $create = $this->application->find('migrate/up');
         $commandUp = new CommandTester($create);

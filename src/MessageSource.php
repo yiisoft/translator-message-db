@@ -30,9 +30,9 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
     public function __construct(
         private ConnectionInterface $db,
         private CacheInterface|null $cache = null,
-        int $cacheDuration = null
+        int $cacheDuration = 3600
     ) {
-        $this->cachingDuration = $cacheDuration ?? $this->cachingDuration;
+        $this->cachingDuration = $cacheDuration;
     }
 
     public function getMessage(string $id, string $category, string $locale, array $parameters = []): string|null

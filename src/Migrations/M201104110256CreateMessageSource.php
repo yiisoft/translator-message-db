@@ -26,6 +26,20 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_bin ENGINE=InnoDB';
         }
 
+        $columnsMessage = match ($b->getDb()->getName()) {
+            'sqlite' => [
+                'id' => 'integer NOT NULL REFERENCES `source_message` (`id`) ON UPDATE RESTRICT ON DELETE CASCADE',
+                'locale' => $b->string(16)->notNull(),
+                'translation' => $b->text(),
+                'PRIMARY KEY (`id`, `locale`)',
+            ],
+            default => [
+                'id' => $b->integer()->notNull(),
+                'locale' => $b->string(16)->notNull(),
+                'translation' => $b->text(),
+            ],
+        };
+
         $b->createTable('{{%source_message}}', [
             'id' => $b->primaryKey(),
             'category' => $b->string(),
@@ -33,29 +47,30 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
             'comment' => $b->text(),
         ], $tableOptions);
 
-        $b->createTable('{{%message}}', [
-            'id' => $b->integer()->notNull(),
-            'locale' => $b->string(16)->notNull(),
-            'translation' => $b->text(),
-        ], $tableOptions);
+        $b->createTable('{{%message}}', $columnsMessage, $tableOptions);
 
-        $b->addPrimaryKey('pk_message_id_locale', '{{%message}}', ['id', 'locale']);
-        $onUpdateConstraint = 'RESTRICT';
+        if ($b->getDb()->getName() !== 'sqlite') {
+            $b->addPrimaryKey('pk_message_id_locale', '{{%message}}', ['id', 'locale']);
+            $onUpdateConstraint = 'RESTRICT';
+        }
 
         if ($b->getDb()->getName() === 'sqlsrv') {
             // 'NO ACTION' is equivalent to 'RESTRICT' in MSSQL
             $onUpdateConstraint = 'NO ACTION';
         }
 
-        $b->addForeignKey(
-            'fk_message_source_message',
-            '{{%message}}',
-            'id',
-            '{{%source_message}}',
-            'id',
-            'CASCADE',
-            $onUpdateConstraint
-        );
+        if ($b->getDb()->getName() !== 'sqlite') {
+            $b->addForeignKey(
+                'fk_message_source_message',
+                '{{%message}}',
+                'id',
+                '{{%source_message}}',
+                'id',
+                'CASCADE',
+                $onUpdateConstraint
+            );
+        }
+
         $b->createIndex('idx_source_message_category', '{{%source_message}}', 'category');
         $b->createIndex('idx_message_locale', '{{%message}}', 'locale');
     }
@@ -66,7 +81,10 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
      */
     public function down(MigrationBuilder $b): void
     {
-        $b->dropForeignKey('fk_message_source_message', '{{%message}}');
+        if ($b->getDb()->getName() !== 'sqlite') {
+            $b->dropForeignKey('fk_message_source_message', '{{%message}}');
+        }
+
         $b->dropTable('{{%message}}');
         $b->dropTable('{{%source_message}}');
     }
