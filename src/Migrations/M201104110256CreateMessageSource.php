@@ -51,8 +51,9 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
 
         if ($b->getDb()->getName() !== 'sqlite') {
             $b->addPrimaryKey('pk_message_id_locale', '{{%message}}', ['id', 'locale']);
-            $onUpdateConstraint = 'RESTRICT';
         }
+
+        $onUpdateConstraint = 'RESTRICT';
 
         if ($b->getDb()->getName() === 'sqlsrv') {
             // 'NO ACTION' is equivalent to 'RESTRICT' in MSSQL
