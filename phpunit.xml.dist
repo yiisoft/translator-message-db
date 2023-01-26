@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<phpunit bootstrap="vendor/autoload.php"
-         colors="true"
-         verbose="true"
-         failOnRisky="true"
-         failOnWarning="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         stopOnFailure="false"
-         executionOrder="random"
-         resolveDependencies="true">
+<phpunit
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    executionOrder="random"
+    failOnRisky="true"
+    failOnWarning="true"
+    resolveDependencies="true"
+    stopOnFailure="false"
+    verbose="true"
+>
+
     <php>
         <ini name="error_reporting" value="-1"/>
     </php>
@@ -18,6 +21,18 @@
     <testsuites>
         <testsuite name="Yii Translator DB Message Storage tests">
             <directory>./tests</directory>
+        </testsuite>
+        <testsuite name="Mssql">
+          <directory>./tests/Mssql</directory>
+        </testsuite>
+        <testsuite name="Mysql">
+          <directory>./tests/Mysql</directory>
+        </testsuite>
+        <testsuite name="Pgsql">
+          <directory>./tests/Pgsql</directory>
+        </testsuite>
+        <testsuite name="Sqlite">
+          <directory>./tests/Sqlite</directory>
         </testsuite>
     </testsuites>
 
