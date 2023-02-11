@@ -23,21 +23,19 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
      * @psalm-var array<string, array<string, array<string, array<string, string>>>>
      */
     private array $messages = [];
-    private ConnectionInterface $db;
     private string $sourceMessageTable = '{{%source_message}}';
     private string $messageTable = '{{%message}}';
-
-    private ?CacheInterface $cache;
     private int $cachingDuration = 3600;
 
-    public function __construct(ConnectionInterface $db, ?CacheInterface $cache = null, ?int $cacheDuration = null)
-    {
-        $this->db = $db;
-        $this->cache = $cache;
-        $this->cachingDuration = $cacheDuration ?? $this->cachingDuration;
+    public function __construct(
+        private ConnectionInterface $db,
+        private CacheInterface|null $cache = null,
+        int $cacheDuration = 3600
+    ) {
+        $this->cachingDuration = $cacheDuration;
     }
 
-    public function getMessage(string $id, string $category, string $locale, array $parameters = []): ?string
+    public function getMessage(string $id, string $category, string $locale, array $parameters = []): string|null
     {
         if (!isset($this->messages[$category][$locale])) {
             $this->messages[$category][$locale] = $this->read($category, $locale);
@@ -68,7 +66,6 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             ->all();
 
         $sourceMessages = ArrayHelper::map($sourceMessages, 'message_id', 'id');
-
         $translatedMessages = $this->readFromDb($category, $locale);
 
         foreach ($messages as $messageId => $messageData) {
@@ -94,8 +91,8 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
                 /** @psalm-var array<string,string>|false */
                 $result = $this->db
-                    ->getSchema()
-                    ->insert(
+                    ->createCommand()
+                    ->insertWithReturningPks(
                         $this->sourceMessageTable,
                         [
                             'category' => $category,
@@ -103,6 +100,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                             'comment' => $comment,
                         ],
                     );
+
                 if ($result === false) {
                     throw new RuntimeException("Failed to write source message with \"$messageId\" ID.");
                 }
@@ -121,8 +119,8 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
             if ($needUpdate || !isset($translatedMessages[$messageId])) {
                 $result = $this->db
-                    ->getSchema()
-                    ->insert(
+                    ->createCommand()
+                    ->insertWithReturningPks(
                         $this->messageTable,
                         [
                             'id' => $sourceMessages[$messageId],
@@ -130,6 +128,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                             'translation' => $messageData['message'],
                         ]
                     );
+
                 if ($result === false) {
                     throw new RuntimeException("Failed to write message with \"$messageId\" ID.");
                 }
@@ -171,9 +170,8 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                     'ts.category' => $category,
                 ]
             )
-            ->where([
-                'locale' => $locale,
-            ]);
+            ->where(['locale' => $locale]);
+
         /** @psalm-var array<int, array<string, string>> */
         $messages = $query->all();
 
@@ -188,12 +186,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
     private function getCacheKey(string $category, string $locale): string
     {
-        $key = [
-            __CLASS__,
-            $category,
-            $locale,
-        ];
-
+        $key = [__CLASS__, $category, $locale];
         $jsonKey = json_encode($key);
 
         return md5($jsonKey);
