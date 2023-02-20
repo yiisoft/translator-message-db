@@ -23,7 +23,7 @@
     "require": {
         "php": "^8.0",
         "ext-json": "*",
-        "yiisoft/cache": "2.0",
+        "yiisoft/cache": "3.0.0",
         "yiisoft/arrays": "^2.0|^3.0",
         "yiisoft/db": "^3.0@dev",
         "yiisoft/translator": "^2.2"
