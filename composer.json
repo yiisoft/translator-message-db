@@ -26,7 +26,7 @@
         "yiisoft/cache": "2.0",
         "yiisoft/arrays": "^2.0|^3.0",
         "yiisoft/db": "^3.0@dev",
-        "yiisoft/translator": "^2.2"
+        "yiisoft/translator": "^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
