@@ -101,6 +101,8 @@ trait SqliteHelper
                 'class' => Aliases::class,
             ],
 
+            \Psr\SimpleCache\CacheInterface::class => Reference::to(ArrayCache::class),
+
             CacheInterface::class => [
                 'class' => Cache::class,
                 '__construct()' => [Reference::to(ArrayCache::class)],
