@@ -50,7 +50,7 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
         $b->createTable('{{%message}}', $columnsMessage, $tableOptions);
 
         if ($b->getDb()->getName() !== 'sqlite') {
-            $b->addPrimaryKey('pk_message_id_locale', '{{%message}}', ['id', 'locale']);
+            $b->addPrimaryKey('{{%message}}', 'pk_message_id_locale', ['id', 'locale']);
         }
 
         $onUpdateConstraint = 'RESTRICT';
@@ -62,8 +62,8 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
 
         if ($b->getDb()->getName() !== 'sqlite') {
             $b->addForeignKey(
-                'fk_message_source_message',
                 '{{%message}}',
+                'fk_message_source_message',
                 'id',
                 '{{%source_message}}',
                 'id',
@@ -72,8 +72,8 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
             );
         }
 
-        $b->createIndex('idx_source_message_category', '{{%source_message}}', 'category');
-        $b->createIndex('idx_message_locale', '{{%message}}', 'locale');
+        $b->createIndex('{{%source_message}}', 'idx_source_message_category', 'category');
+        $b->createIndex('{{%message}}', 'idx_message_locale', 'locale');
     }
 
     /**
@@ -83,7 +83,7 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
     public function down(MigrationBuilder $b): void
     {
         if ($b->getDb()->getName() !== 'sqlite') {
-            $b->dropForeignKey('fk_message_source_message', '{{%message}}');
+            $b->dropForeignKey('{{%message}}', 'fk_message_source_message');
         }
 
         $b->dropTable('{{%message}}');
