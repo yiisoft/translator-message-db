@@ -12,9 +12,9 @@ use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Pgsql\Connection;
+use Yiisoft\Db\Pgsql\Driver;
 use Yiisoft\Db\Pgsql\Dsn;
-use Yiisoft\Db\Pgsql\PdoConnection;
-use Yiisoft\Db\Pgsql\PdoDriver;
 use Yiisoft\Definitions\Exception\CircularReferenceException;
 use Yiisoft\Definitions\Exception\InvalidConfigException;
 use Yiisoft\Definitions\Exception\NotInstantiableException;
@@ -109,9 +109,9 @@ trait PgsqlHelper
             ],
 
             ConnectionInterface::class => [
-                'class' => PdoConnection::class,
+                'class' => Connection::class,
                 '__construct()' => [
-                    new PdoDriver($this->getDsn(), 'root', 'root'),
+                    new Driver($this->getDsn(), 'root', 'root'),
                 ],
             ],
 

@@ -12,9 +12,9 @@ use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Mssql\Connection;
+use Yiisoft\Db\Mssql\Driver;
 use Yiisoft\Db\Mssql\Dsn;
-use Yiisoft\Db\Mssql\PdoConnection;
-use Yiisoft\Db\Mssql\PdoDriver;
 use Yiisoft\Definitions\Exception\CircularReferenceException;
 use Yiisoft\Definitions\Exception\InvalidConfigException;
 use Yiisoft\Definitions\Exception\NotInstantiableException;
@@ -109,9 +109,9 @@ trait MssqlHelper
             ],
 
             ConnectionInterface::class => [
-                'class' => PdoConnection::class,
+                'class' => Connection::class,
                 '__construct()' => [
-                    new PdoDriver($this->getDsn(), 'SA', 'YourStrong!Passw0rd'),
+                    new Driver($this->getDsn(), 'SA', 'YourStrong!Passw0rd'),
                 ],
             ],
 
