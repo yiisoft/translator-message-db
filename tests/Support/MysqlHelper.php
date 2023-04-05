@@ -12,9 +12,9 @@ use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
-use Yiisoft\Db\Mysql\ConnectionPDO;
+use Yiisoft\Db\Mysql\Connection;
+use Yiisoft\Db\Mysql\Driver;
 use Yiisoft\Db\Mysql\Dsn;
-use Yiisoft\Db\Mysql\PDODriver;
 use Yiisoft\Definitions\Exception\CircularReferenceException;
 use Yiisoft\Definitions\Exception\InvalidConfigException;
 use Yiisoft\Definitions\Exception\NotInstantiableException;
@@ -109,9 +109,9 @@ trait MysqlHelper
             ],
 
             ConnectionInterface::class => [
-                'class' => ConnectionPDO::class,
+                'class' => Connection::class,
                 '__construct()' => [
-                    new PDODriver($this->getDsn(), 'root', ''),
+                    new Driver($this->getDsn(), 'root', ''),
                 ],
             ],
 
