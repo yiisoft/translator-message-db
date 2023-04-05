@@ -12,9 +12,9 @@ use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
-use Yiisoft\Db\Sqlite\ConnectionPDO;
 use Yiisoft\Db\Sqlite\Dsn;
-use Yiisoft\Db\Sqlite\PDODriver;
+use Yiisoft\Db\Sqlite\PdoConnection;
+use Yiisoft\Db\Sqlite\PdoDriver;
 use Yiisoft\Definitions\Exception\CircularReferenceException;
 use Yiisoft\Definitions\Exception\InvalidConfigException;
 use Yiisoft\Definitions\Exception\NotInstantiableException;
@@ -109,9 +109,9 @@ trait SqliteHelper
             ],
 
             ConnectionInterface::class => [
-                'class' => ConnectionPDO::class,
+                'class' => PdoConnection::class,
                 '__construct()' => [
-                    new PDODriver($this->getDsn()),
+                    new PdoDriver($this->getDsn()),
                 ],
             ],
 

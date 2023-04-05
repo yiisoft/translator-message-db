@@ -33,10 +33,9 @@
         "roave/infection-static-analysis-plugin": "^1.16",
         "spatie/phpunit-watcher": "^1.23",
         "vimeo/psalm": "^4.18",
-        "yiisoft/db-sqlite": "3.0.x-dev",
         "yiisoft/di": "^1.0",
         "yiisoft/psr-dummy-provider": "^1.0",
-        "yiisoft/yii-db-migration": "1.0.x-dev"
+        "yiisoft/yii-db-migration": "dev-better-naming-classes as 1.0.x-dev"
     },
     "autoload": {
         "psr-4": {
