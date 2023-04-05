@@ -22,11 +22,11 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
     {
         $tableOptions = null;
 
-        if ($b->getDb()->getName() === 'mysql') {
+        if ($b->getDb()->getDriverName() === 'mysql') {
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_bin ENGINE=InnoDB';
         }
 
-        $columnsMessage = match ($b->getDb()->getName()) {
+        $columnsMessage = match ($b->getDb()->getDriverName()) {
             'sqlite' => [
                 'id' => 'integer NOT NULL REFERENCES `source_message` (`id`) ON UPDATE RESTRICT ON DELETE CASCADE',
                 'locale' => $b->string(16)->notNull(),
@@ -49,18 +49,18 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
 
         $b->createTable('{{%message}}', $columnsMessage, $tableOptions);
 
-        if ($b->getDb()->getName() !== 'sqlite') {
+        if ($b->getDb()->getDriverName() !== 'sqlite') {
             $b->addPrimaryKey('{{%message}}', 'pk_message_id_locale', ['id', 'locale']);
         }
 
         $onUpdateConstraint = 'RESTRICT';
 
-        if ($b->getDb()->getName() === 'sqlsrv') {
+        if ($b->getDb()->getDriverName() === 'sqlsrv') {
             // 'NO ACTION' is equivalent to 'RESTRICT' in MSSQL
             $onUpdateConstraint = 'NO ACTION';
         }
 
-        if ($b->getDb()->getName() !== 'sqlite') {
+        if ($b->getDb()->getDriverName() !== 'sqlite') {
             $b->addForeignKey(
                 '{{%message}}',
                 'fk_message_source_message',
@@ -82,7 +82,7 @@ final class M201104110256CreateMessageSource implements RevertibleMigrationInter
      */
     public function down(MigrationBuilder $b): void
     {
-        if ($b->getDb()->getName() !== 'sqlite') {
+        if ($b->getDb()->getDriverName() !== 'sqlite') {
             $b->dropForeignKey('{{%message}}', 'fk_message_source_message');
         }
 
