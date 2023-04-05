@@ -158,7 +158,7 @@ abstract class AbstractMessageSourceTest extends TestCase
     /**
      * @psalm-return array<array{0: string, 1: string, 2: array<string, array<string, string>>}>
      */
-    public function generateTranslationsData(): array
+    public static function generateTranslationsData(): array
     {
         return [
             [
@@ -195,7 +195,7 @@ abstract class AbstractMessageSourceTest extends TestCase
     /**
      * @psalm-return array<array{0: string, 1: string, 2: array<string, array<string, string|int>>}>
      */
-    public function generateFailTranslationsData(): array
+    public static function generateFailTranslationsData(): array
     {
         return [
             [

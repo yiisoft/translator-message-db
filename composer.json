@@ -29,10 +29,10 @@
         "yiisoft/translator": "^2.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5",
-        "roave/infection-static-analysis-plugin": "^1.16",
+        "phpunit/phpunit": "^9.6|^10",
+        "roave/infection-static-analysis-plugin": "^1.28",
         "spatie/phpunit-watcher": "^1.23",
-        "vimeo/psalm": "^4.18",
+        "vimeo/psalm": "^4.8|^5.8",
         "yiisoft/di": "^1.0",
         "yiisoft/psr-dummy-provider": "^1.0",
         "yiisoft/yii-db-migration": "dev-better-naming-classes as 1.0.x-dev"
