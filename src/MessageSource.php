@@ -31,8 +31,11 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
     private string $sourceMessageTable = '{{%source_message}}';
     private string $messageTable = '{{%message}}';
 
-    public function __construct(private ConnectionInterface $db, private CacheInterface|null $cache = null, private int $cachingDuration = 3600)
-    {
+    public function __construct(
+        private ConnectionInterface $db,
+        private CacheInterface|null $cache = null,
+        private int $cachingDuration = 3600
+    ) {
     }
 
     public function getMessage(string $id, string $category, string $locale, array $parameters = []): string|null
