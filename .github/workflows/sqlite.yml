@@ -19,7 +19,7 @@ on:
       - 'infection.json.dist'
       - 'psalm.xml'
 
-name: db-sqlite
+name: sqlite
 
 jobs:
   tests:
@@ -27,7 +27,6 @@ jobs:
 
     env:
       extensions: pdo, pdo_sqlite
-      key: cache-v1
 
     runs-on: ${{ matrix.os }}
 
@@ -43,10 +42,10 @@ jobs:
           - 8.2
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout.
+        uses: actions/checkout@v2
 
-      - name: Install PHP with extensions
+      - name: Install PHP with extensions.
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -55,16 +54,17 @@ jobs:
           coverage: pcov
           tools: composer:v2
 
-      - name: Update composer
+      - name: Update composer.
         run: composer self-update
 
       - name: Install db-sqlite.
-        run: composer require yiisoft/db-sqlite --no-interaction --no-progress --optimize-autoloader --ansi
+        run: composer require yiisoft/db-sqlite --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
-      - name: Run tests with phpunit
-        run: vendor/bin/phpunit --coverage-clover=coverage.xml --colors=always --testsuite=Sqlite
+      - name: Run tests with phpunit.
+        run: vendor/bin/phpunit --testsuite=Sqlite --coverage-clover=coverage.xml --colors=always
 
-      - name: Upload coverage to Codecov
+      - name: Upload coverage to Codecov.
+        if: matrix.php == '8.1'
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
