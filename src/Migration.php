@@ -197,7 +197,7 @@ final class Migration
                 'category' => $schema->createColumn(SchemaInterface::TYPE_STRING),
                 'message_id' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
                 'comment' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
-                "CONSTRAINT [[PK_message]] PRIMARY KEY ([[id]])",
+                'CONSTRAINT [[PK_message]] PRIMARY KEY ([[id]])',
             ],
         )->execute();
 
