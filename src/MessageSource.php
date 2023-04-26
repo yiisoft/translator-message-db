@@ -30,14 +30,9 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
     private array $messages = [];
     private string $sourceMessageTable = '{{%source_message}}';
     private string $messageTable = '{{%message}}';
-    private int $cachingDuration = 3600;
 
-    public function __construct(
-        private ConnectionInterface $db,
-        private CacheInterface|null $cache = null,
-        int $cacheDuration = 3600
-    ) {
-        $this->cachingDuration = $cacheDuration;
+    public function __construct(private ConnectionInterface $db, private CacheInterface|null $cache = null, private int $cachingDuration = 3600)
+    {
     }
 
     public function getMessage(string $id, string $category, string $locale, array $parameters = []): string|null
@@ -150,9 +145,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             /** @psalm-var array<string, array<string, string>> */
             return $this->cache->getOrSet(
                 $this->getCacheKey($category, $locale),
-                function () use ($category, $locale) {
-                    return $this->readFromDb($category, $locale);
-                },
+                fn() => $this->readFromDb($category, $locale),
                 $this->cachingDuration
             );
         }
@@ -181,18 +174,16 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         $messages = $query->all();
 
         /** @psalm-var array<string, array<string, string>> */
-        return ArrayHelper::map($messages, 'message_id', static function (array $message): array {
-            return array_merge(
-                ['message' => $message['translation']],
-                !empty($message['comment']) ? ['comment' => $message['comment']] : []
-            );
-        });
+        return ArrayHelper::map($messages, 'message_id', static fn(array $message): array => array_merge(
+            ['message' => $message['translation']],
+            !empty($message['comment']) ? ['comment' => $message['comment']] : []
+        ));
     }
 
     private function getCacheKey(string $category, string $locale): string
     {
-        $key = [__CLASS__, $category, $locale];
-        $jsonKey = json_encode($key);
+        $key = [self::class, $category, $locale];
+        $jsonKey = json_encode($key, JSON_THROW_ON_ERROR);
 
         return md5($jsonKey);
     }
