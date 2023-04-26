@@ -16,6 +16,13 @@ final class Migration
         $driverName = $db->getDriverName();
         $schema = $db->getSchema();
 
+        if (
+            $schema->getTableSchema('{{%source_message}}', true) !== null &&
+            $schema->getTableSchema('{{%message}}', true) !== null
+        ) {
+            return;
+        }
+
         if ($driverName === 'sqlite') {
             self::ensureTableSqlite($command, $schema);
 
