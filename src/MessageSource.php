@@ -17,6 +17,11 @@ use Yiisoft\Translator\MessageWriterInterface;
 use function array_key_exists;
 use function is_string;
 
+/**
+ * Allows using database as message source for `yiisoft/translator`.
+ *
+ * Database schema can be initialized, you can use the {@see Migration::ensureTable()} method for this.
+ */
 final class MessageSource implements MessageReaderInterface, MessageWriterInterface
 {
     /**
