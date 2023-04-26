@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Translator\Message\Db\Tests;
+namespace Yiisoft\Translator\Message\Db\Tests\Common;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Yiisoft\Cache\ArrayCache;
+use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Translator\Message\Db\MessageSource;
@@ -17,6 +19,22 @@ abstract class AbstractMessageSourceTest extends TestCase
 {
     protected CacheInterface $cache;
     protected ConnectionInterface $db;
+
+    protected function setup(): void
+    {
+        $this->cache = new Cache(new ArrayCache());
+
+        parent::setup();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->db->close();
+
+        unset($this->db, $this->cache);
+
+        parent::tearDown();
+    }
 
     /**
      * @dataProvider generateTranslationsData
