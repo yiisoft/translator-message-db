@@ -41,7 +41,7 @@ final class Migration
         // drop sequence for table `source_message` and `message`.
         if ($db->getSchema()->getTableSchema('{{%message}}', true) !== null) {
             // drop foreign key for table `message`.
-            if ($driverName !== 'sqlite' && $schema->getTableForeignKeys('{{FK_message_source_message}}', true)) {
+            if ($driverName !== 'sqlite' && $schema->getTableForeignKeys('{{%message}}', true) !== []) {
                 $command->dropForeignKey('{{%message}}', '{{FK_message_source_message}}')->execute();
             }
 
