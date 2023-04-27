@@ -203,7 +203,6 @@ final class Migration
         string $tableRawNameSourceMessage,
         string $tableRawNameMessage
     ): void {
-
         $command->createIndex(
             $tableRawNameSourceMessage,
             "IDX_{$tableRawNameSourceMessage}_category",
