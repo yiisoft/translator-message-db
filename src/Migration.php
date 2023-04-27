@@ -4,97 +4,160 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db;
 
+use Throwable;
 use Yiisoft\Db\Command\CommandInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Exception\Exception;
+use Yiisoft\Db\Exception\InvalidArgumentException;
+use Yiisoft\Db\Exception\InvalidConfigException;
+use Yiisoft\Db\Exception\NotSupportedException;
 use Yiisoft\Db\Schema\SchemaInterface;
 
 final class Migration
 {
-    public static function ensureTable(ConnectionInterface $db): void
-    {
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
+    public static function ensureTable(
+        ConnectionInterface $db,
+        string $tableSourceMessage = '{{%source_message}}',
+        string $tableMessage = '{{%message}}',
+    ): void {
         $command = $db->createCommand();
         $driverName = $db->getDriverName();
         $schema = $db->getSchema();
+        $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
+        $tableRawNameMessage = $schema->getRawTableName($tableMessage);
 
         if (
-            $schema->getTableSchema('{{%source_message}}', true) !== null &&
-            $schema->getTableSchema('{{%message}}', true) !== null
+            $schema->getTableSchema($tableSourceMessage, true) !== null &&
+            $schema->getTableSchema($tableMessage, true) !== null
         ) {
             return;
         }
 
         if ($driverName === 'sqlite') {
-            self::ensureTableSqlite($command, $schema);
+            self::ensureTableSqlite(
+                $command,
+                $schema,
+                $tableRawNameSourceMessage,
+                $tableRawNameMessage
+            );
 
             return;
         }
 
-        self::ensureTableNotSqlite($command, $driverName, $schema);
+        self::ensureTableNotSqlite(
+            $command,
+            $driverName,
+            $schema,
+            $tableRawNameSourceMessage,
+            $tableRawNameMessage
+        );
     }
 
-    public static function dropTable(ConnectionInterface $db): void
-    {
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
+    public static function dropTable(
+        ConnectionInterface $db,
+        string $tableSourceMessage = '{{%source_message}}',
+        string $tableMessage = '{{%message}}',
+    ): void {
         $command = $db->createCommand();
         $driverName = $db->getDriverName();
         $schema = $db->getSchema();
+        $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
+        $tableRawNameMessage = $schema->getRawTableName($tableMessage);
 
         // drop sequence for table `source_message` and `message`.
-        if ($db->getSchema()->getTableSchema('{{%message}}', true) !== null) {
+        if ($db->getTableSchema($tableMessage, true) !== null) {
             // drop foreign key for table `message`.
-            if ($driverName !== 'sqlite' && $schema->getTableForeignKeys('{{%message}}', true) !== []) {
-                $command->dropForeignKey('{{%message}}', '{{FK_message_source_message}}')->execute();
+            if ($driverName !== 'sqlite' && $schema->getTableForeignKeys($tableMessage, true) !== []) {
+                $command->dropForeignKey(
+                    $tableMessage,
+                    "{{FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}}}",
+                )->execute();
             }
 
             // drop table `message`.
-            $command->dropTable('{{%message}}')->execute();
+            $command->dropTable($tableMessage)->execute();
 
             if ($driverName === 'oci') {
                 $command->setSql(
                     <<<SQL
-                    DROP SEQUENCE {{%message_SEQ}}
+                    DROP SEQUENCE {{{$tableRawNameMessage}_SEQ}}
                     SQL,
                 )->execute();
             }
         }
 
-        if ($db->getSchema()->getTableSchema('{{%source_message}}', true) !== null) {
+        if ($db->getTableSchema($tableSourceMessage, true) !== null) {
             // drop table `source_message`.
-            $command->dropTable('{{%source_message}}')->execute();
+            $command->dropTable($tableSourceMessage)->execute();
 
             if ($driverName === 'oci') {
                 $command->setSql(
                     <<<SQL
-                    DROP SEQUENCE {{%source_message_SEQ}}
+                    DROP SEQUENCE {{{$tableRawNameSourceMessage}_SEQ}}
                     SQL,
                 )->execute();
             }
         }
     }
 
-    private static function addForeingKeyMigration(CommandInterface $command, string|null $update = null): void
-    {
+    /**
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws Throwable
+     */
+    private static function addForeignKeyMigration(
+        CommandInterface $command,
+        string $tableRawNameSourceMessage,
+        string $tableRawNameMessage,
+        string|null $update = null
+    ): void {
         $command->addForeignKey(
-            '{{%message}}',
-            'FK_message_source_message',
+            $tableRawNameMessage,
+            "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}",
             ['id'],
-            '{{%source_message}}',
+            $tableRawNameSourceMessage,
             ['id'],
             'CASCADE',
             $update
         )->execute();
     }
 
-    private static function addPrimaryKey(CommandInterface $command): void
+    /**
+     * @throws Exception
+     * @throws Throwable
+     */
+    private static function addPrimaryKey(CommandInterface $command, string $tableRawNameMessage): void
     {
-        $command->addPrimaryKey('{{%message}}', 'PK_message_id_locale', ['id', 'locale'])->execute();
+        $command->addPrimaryKey(
+            $tableRawNameMessage,
+            "PK_{$tableRawNameMessage}_id_locale",
+            ['id', 'locale']
+        )->execute();
     }
 
-    private static function addSequenceAndTrigger(CommandInterface $command): void
-    {
-        // create sequence for table `source_message` and `message`.
+    /**
+     * @throws Exception
+     * @throws Throwable
+     */
+    private static function addSequenceAndTrigger(
+        CommandInterface $command,
+        string $tableRawNameSourceMessage,
+        string $tableRawNameMessage
+    ): void {
+        // create a sequence for table `source_message` and `message`.
         $command->setSql(
             <<<SQL
-            CREATE SEQUENCE {{%source_message_SEQ}}
+            CREATE SEQUENCE {{{$tableRawNameSourceMessage}_SEQ}}
             START WITH 1
             INCREMENT BY 1
             NOMAXVALUE
@@ -103,7 +166,7 @@ final class Migration
 
         $command->setSql(
             <<<SQL
-            CREATE SEQUENCE {{%message_SEQ}}
+            CREATE SEQUENCE {{{$tableRawNameMessage}_SEQ}}
             START WITH 1
             INCREMENT BY 1
             NOMAXVALUE
@@ -113,8 +176,8 @@ final class Migration
         // create trigger for table `source_message` and `message`.
         $command->setSql(
             <<<SQL
-            CREATE TRIGGER {{%source_message_TRG}} BEFORE INSERT ON {{%source_message}} FOR EACH ROW BEGIN <<COLUMN_SEQUENCES>> BEGIN
-            IF INSERTING AND :NEW."id" IS NULL THEN SELECT {{%source_message_SEQ}}.NEXTVAL INTO :NEW."id" FROM SYS.DUAL; END IF;
+            CREATE TRIGGER {{{$tableRawNameSourceMessage}_TRG}} BEFORE INSERT ON {{{$tableRawNameSourceMessage}}} FOR EACH ROW BEGIN <<COLUMN_SEQUENCES>> BEGIN
+            IF INSERTING AND :NEW."id" IS NULL THEN SELECT {{{$tableRawNameSourceMessage}_SEQ}}.NEXTVAL INTO :NEW."id" FROM SYS.DUAL; END IF;
             END COLUMN_SEQUENCES;
             END;
             SQL,
@@ -122,25 +185,52 @@ final class Migration
 
         $command->setSql(
             <<<SQL
-            CREATE TRIGGER {{%message_TRG}} BEFORE INSERT ON {{%message}} FOR EACH ROW BEGIN <<COLUMN_SEQUENCES>> BEGIN
-            IF INSERTING AND :NEW."id" IS NULL THEN SELECT {{%message_SEQ}}.NEXTVAL INTO :NEW."id" FROM SYS.DUAL; END IF;
+            CREATE TRIGGER {{{$tableRawNameMessage}_TRG}} BEFORE INSERT ON {{{$tableRawNameMessage}}} FOR EACH ROW BEGIN <<COLUMN_SEQUENCES>> BEGIN
+            IF INSERTING AND :NEW."id" IS NULL THEN SELECT {{{$tableRawNameMessage}_SEQ}}.NEXTVAL INTO :NEW."id" FROM SYS.DUAL; END IF;
             END COLUMN_SEQUENCES;
             END;
             SQL,
         )->execute();
     }
 
-    private static function createIndexForMigration(CommandInterface $command): void
-    {
-        $command->createIndex('{{%source_message}}', 'IDX_source_message_category', 'category')->execute();
-        $command->createIndex('{{%message}}', 'IDX_message_locale', 'locale')->execute();
+    /**
+     * @throws InvalidArgumentException
+     * @throws Exception
+     * @throws Throwable
+     */
+    private static function createIndexForMigration(
+        CommandInterface $command,
+        string $tableRawNameSourceMessage,
+        string $tableRawNameMessage
+    ): void {
+
+        $command->createIndex(
+            $tableRawNameSourceMessage,
+            "IDX_{$tableRawNameSourceMessage}_category",
+            'category',
+        )->execute();
+        $command->createIndex(
+            $tableRawNameMessage,
+            "IDX_{$tableRawNameMessage}_locale",
+            'locale'
+        )->execute();
     }
 
-    private static function createTable(CommandInterface $command, SchemaInterface $schema): void
-    {
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotSupportedException
+     * @throws Throwable
+     */
+    private static function createTable(
+        CommandInterface $command,
+        SchemaInterface $schema,
+        string $tableRawNameSourceMessage,
+        string $tableRawNameMessage
+    ): void {
         // create table `source_message`.
         $command->createTable(
-            '{{%source_message}}',
+            $tableRawNameSourceMessage,
             [
                 'id' => $schema->createColumn(SchemaInterface::TYPE_PK),
                 'category' => $schema->createColumn(SchemaInterface::TYPE_STRING),
@@ -151,7 +241,7 @@ final class Migration
 
         // create table `message`.
         $command->createTable(
-            '{{%message}}',
+            $tableRawNameMessage,
             [
                 'id' => $schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
                 'locale' => $schema->createColumn(SchemaInterface::TYPE_STRING, 16)->notNull(),
@@ -160,67 +250,87 @@ final class Migration
         )->execute();
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidConfigException
+     * @throws NotSupportedException
+     * @throws Throwable
+     */
     private static function ensureTableNotSqlite(
         CommandInterface $command,
         string $driverName,
-        SchemaInterface $schema
+        SchemaInterface $schema,
+        string $tableRawNameSourceMessage,
+        string $tableRawNameMessage
     ): void {
         $updateAction = 'RESTRICT';
 
         if ($driverName === 'sqlsrv') {
-            // 'NO ACTION' is equivalent to 'RESTRICT' in MSSQL
+            // 'NO ACTION' is equal to 'RESTRICT' in MSSQL
             $updateAction = 'NO ACTION';
         }
 
         if ($driverName === 'oci') {
-            // Oracle does not support action for update.
+            // Oracle doesn't support action for update.
             $updateAction = null;
         }
 
-        self::createTable($command, $schema);
+        self::createTable($command, $schema, $tableRawNameSourceMessage, $tableRawNameMessage);
+
+        // create primary key for table `source_message` and `message`.
+        self::addPrimaryKey($command, $tableRawNameMessage);
 
         // create index for table `source_message` and `message`.
-        self::createIndexForMigration($command);
+        self::createIndexForMigration($command, $tableRawNameSourceMessage, $tableRawNameMessage);
 
         if ($driverName === 'oci') {
             // create sequence and trigger for table `source_message` and `message`.
-            self::addSequenceAndTrigger($command);
+            self::addSequenceAndTrigger($command, $tableRawNameSourceMessage, $tableRawNameMessage);
         }
 
-        // create primary key for table `source_message` and `message`.
-        self::addPrimaryKey($command);
-
         // add foreign key for table `message`.
-        self::addForeingKeyMigration($command, $updateAction);
+        self::addForeignKeyMigration($command, $tableRawNameSourceMessage, $tableRawNameMessage, $updateAction);
     }
 
-    private static function ensureTableSqlite(CommandInterface $command, SchemaInterface $schema): void
-    {
+    /**
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidConfigException
+     * @throws NotSupportedException
+     * @throws Throwable
+     */
+    private static function ensureTableSqlite(
+        CommandInterface $command,
+        SchemaInterface $schema,
+        string $tableRawNameSourceMessage,
+        string $tableRawNameMessage
+    ): void {
         // create table `source_message`.
         $command->createTable(
-            '{{%source_message}}',
+            $tableRawNameSourceMessage,
             [
                 'id' => $schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
                 'category' => $schema->createColumn(SchemaInterface::TYPE_STRING),
                 'message_id' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
                 'comment' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
-                'CONSTRAINT [[PK_message]] PRIMARY KEY ([[id]])',
+                "CONSTRAINT [[PK_{$tableRawNameSourceMessage}]] PRIMARY KEY ([[id]])",
             ],
         )->execute();
 
         // create table `message`.
         $command->createTable(
-            '{{%message}}',
+            $tableRawNameMessage,
             [
                 'id' => $schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
                 'locale' => $schema->createColumn(SchemaInterface::TYPE_STRING, 16)->notNull(),
                 'translation' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
                 'PRIMARY KEY (`id`, `locale`)',
-                'CONSTRAINT `FK_message_source_message` FOREIGN KEY (`id`) REFERENCES `source_message` (`id`) ON DELETE CASCADE',
+                "CONSTRAINT `FK_{$tableRawNameMessage}_{$tableRawNameSourceMessage}` FOREIGN KEY (`id`) REFERENCES `$tableRawNameSourceMessage` (`id`) ON DELETE CASCADE",
             ],
         )->execute();
 
         // create index for table `source_message` and `message`.
-        self::createIndexForMigration($command);
+        self::createIndexForMigration($command, $tableRawNameSourceMessage, $tableRawNameMessage);
     }
 }
