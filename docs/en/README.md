@@ -17,8 +17,8 @@ composer require yiisoft/translator-message-db --prefer-dist
 
 ### Quick start
 
-**Step 1.** You need a configured database connection for create migration, for more information see
-[yiisoft/db](https://github.com/yiisoft/db/tree/master/docs/en#create-connection).
+**Step 1.** You need a configured database connection for create migration and use in `yiisoft/translator-message-db` package,
+for more information see [yiisoft/db](https://github.com/yiisoft/db/tree/master/docs/en#create-connection).
 
 **Step 2.** Create migration for `source_message` and `message` tables:
 
