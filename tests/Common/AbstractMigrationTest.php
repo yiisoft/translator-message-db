@@ -27,15 +27,15 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testDropTable(): void
     {
-        Migration::ensureTable($this->db);
+        Migration::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
-        $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
+        $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
+        $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        Migration::dropTable($this->db);
+        Migration::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
-        $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNull($this->db->getTableSchema('{{%message}}', true));
+        $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
+        $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
     }
 
     /**
@@ -45,15 +45,15 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testEnsureTable(): void
     {
-        Migration::ensureTable($this->db);
+        Migration::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
-        $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
+        $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
+        $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        Migration::dropTable($this->db);
+        Migration::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
-        $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNull($this->db->getTableSchema('{{%message}}', true));
+        $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
+        $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
     }
 
     /**
@@ -63,20 +63,20 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testEnsureTableExist(): void
     {
-        Migration::ensureTable($this->db);
+        Migration::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
-        $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
+        $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
+        $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        Migration::ensureTable($this->db);
+        Migration::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
-        $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
+        $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
+        $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        Migration::dropTable($this->db);
+        Migration::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
-        $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNull($this->db->getTableSchema('{{%message}}', true));
+        $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
+        $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
     }
 
     /**
