@@ -16,7 +16,7 @@ use Yiisoft\Db\Exception\InvalidArgumentException;
 use Yiisoft\Db\Exception\InvalidCallException;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Translator\Message\Db\MessageSource;
-use Yiisoft\Translator\Message\Db\Migration;
+use Yiisoft\Translator\Message\Db\DbHelper;
 
 abstract class AbstractMessageSourceTest extends TestCase
 {
@@ -38,7 +38,7 @@ abstract class AbstractMessageSourceTest extends TestCase
     protected function tearDown(): void
     {
         // drop table
-        Migration::dropTable($this->db);
+        DbHelper::dropTable($this->db);
 
         $this->db->close();
 

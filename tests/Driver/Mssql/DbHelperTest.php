@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Translator\Message\Db\Tests\Driver\Mssql;
 
 use Yiisoft\Db\Schema\SchemaInterface;
-use Yiisoft\Translator\Message\Db\Tests\Common\AbstractMigrationTest;
+use Yiisoft\Translator\Message\Db\Tests\Common\AbstractDbHelperTest;
 use Yiisoft\Translator\Message\Db\Tests\Support\MssqlHelper;
 
 /**
@@ -13,7 +13,7 @@ use Yiisoft\Translator\Message\Db\Tests\Support\MssqlHelper;
  *
  * @psalm-suppress PropertyNotSetInConstructor
  */
-final class MigrationTest extends AbstractMigrationTest
+final class DbHelperTest extends AbstractDbHelperTest
 {
     protected string $commentType = SchemaInterface::TYPE_STRING;
     protected string $messageIdType = SchemaInterface::TYPE_STRING;

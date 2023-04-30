@@ -10,9 +10,9 @@ use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Schema\SchemaInterface;
-use Yiisoft\Translator\Message\Db\Migration;
+use Yiisoft\Translator\Message\Db\DbHelper;
 
-abstract class AbstractMigrationTest extends TestCase
+abstract class AbstractDbHelperTest extends TestCase
 {
     protected string $commentType = SchemaInterface::TYPE_TEXT;
     protected string $messageIdType = SchemaInterface::TYPE_TEXT;
@@ -27,12 +27,12 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testDropTable(): void
     {
-        Migration::ensureTable($this->db);
+        DbHelper::ensureTable($this->db);
 
         $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
 
-        Migration::dropTable($this->db);
+        DbHelper::dropTable($this->db);
 
         $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%message}}', true));
@@ -45,12 +45,12 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testDropTableWithCustomTableName(): void
     {
-        Migration::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        Migration::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
@@ -63,12 +63,12 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testEnsureTable(): void
     {
-        Migration::ensureTable($this->db);
+        DbHelper::ensureTable($this->db);
 
         $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
 
-        Migration::dropTable($this->db);
+        DbHelper::dropTable($this->db);
 
         $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%message}}', true));
@@ -81,12 +81,12 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testEnsureTableWithCustomTableName(): void
     {
-        Migration::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        Migration::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
@@ -99,17 +99,17 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testEnsureTableExist(): void
     {
-        Migration::ensureTable($this->db);
+        DbHelper::ensureTable($this->db);
 
         $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
 
-        Migration::ensureTable($this->db);
+        DbHelper::ensureTable($this->db);
 
         $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
 
-        Migration::dropTable($this->db);
+        DbHelper::dropTable($this->db);
 
         $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%message}}', true));
@@ -122,17 +122,17 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testEnsureTableExistWithCustomTableName(): void
     {
-        Migration::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        Migration::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        Migration::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
@@ -145,7 +145,7 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testVerifyTableStructure(): void
     {
-        Migration::ensureTable($this->db);
+        DbHelper::ensureTable($this->db);
 
         $prefix = $this->db->getTablePrefix();
         $driverName = $this->db->getDriverName();
@@ -187,7 +187,7 @@ abstract class AbstractMigrationTest extends TestCase
 
         $this->assertSame($foreignKeysExpected, $tableSchema?->getForeignKeys());
 
-        Migration::dropTable($this->db, '{{%source_message}}', '{{%message}}');
+        DbHelper::dropTable($this->db, '{{%source_message}}', '{{%message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%message}}', true));
@@ -200,7 +200,7 @@ abstract class AbstractMigrationTest extends TestCase
      */
     public function testVerifyTableStructureWithCustomTableName(): void
     {
-        Migration::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $prefix = $this->db->getTablePrefix();
         $driverName = $this->db->getDriverName();
@@ -242,7 +242,7 @@ abstract class AbstractMigrationTest extends TestCase
 
         $this->assertSame($foreignKeysExpected, $tableSchema?->getForeignKeys());
 
-        Migration::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));

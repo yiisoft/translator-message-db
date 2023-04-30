@@ -7,7 +7,7 @@ namespace Yiisoft\Translator\Message\Db\Tests\Driver\Pgsql;
 use Throwable;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
-use Yiisoft\Translator\Message\Db\Migration;
+use Yiisoft\Translator\Message\Db\DbHelper;
 use Yiisoft\Translator\Message\Db\Tests\Common\AbstractMessageSourceTest;
 use Yiisoft\Translator\Message\Db\Tests\Support\PgsqlHelper;
 
@@ -28,7 +28,7 @@ final class MessageSourceTest extends AbstractMessageSourceTest
         // create connection dbms-specific
         $this->db = (new PgsqlHelper())->createConnection();
 
-        Migration::ensureTable($this->db);
+        DbHelper::ensureTable($this->db);
 
         parent::setUp();
     }
