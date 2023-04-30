@@ -9,7 +9,7 @@ use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Translator\Message\Db\DbHelper;
 use Yiisoft\Translator\Message\Db\Tests\Common\AbstractMessageSourceTest;
-use Yiisoft\Translator\Message\Db\Tests\Support\PgsqlHelper;
+use Yiisoft\Translator\Message\Db\Tests\Support\PgsqlFactory;
 
 /**
  * @group Pgsql
@@ -26,7 +26,7 @@ final class MessageSourceTest extends AbstractMessageSourceTest
     protected function setUp(): void
     {
         // create connection dbms-specific
-        $this->db = (new PgsqlHelper())->createConnection();
+        $this->db = (new PgsqlFactory())->createConnection();
 
         DbHelper::ensureTable($this->db);
 

@@ -9,7 +9,7 @@ use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Translator\Message\Db\DbHelper;
 use Yiisoft\Translator\Message\Db\Tests\Common\AbstractMessageSourceTest;
-use Yiisoft\Translator\Message\Db\Tests\Support\OracleHelper;
+use Yiisoft\Translator\Message\Db\Tests\Support\OracleFactory;
 
 /**
  * @group Oracle
@@ -26,7 +26,7 @@ final class MessageSourceTest extends AbstractMessageSourceTest
     protected function setUp(): void
     {
         // create connection dbms-specific
-        $this->db = (new OracleHelper())->createConnection();
+        $this->db = (new OracleFactory())->createConnection();
 
         DbHelper::ensureTable($this->db);
 

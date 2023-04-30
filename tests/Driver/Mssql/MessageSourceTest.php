@@ -9,7 +9,7 @@ use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Translator\Message\Db\DbHelper;
 use Yiisoft\Translator\Message\Db\Tests\Common\AbstractMessageSourceTest;
-use Yiisoft\Translator\Message\Db\Tests\Support\MssqlHelper;
+use Yiisoft\Translator\Message\Db\Tests\Support\MssqlFactory;
 
 /**
  * @group Mssql
@@ -26,7 +26,7 @@ final class MessageSourceTest extends AbstractMessageSourceTest
     protected function setUp(): void
     {
         // create connection dbms-specific
-        $this->db = (new MssqlHelper())->createConnection();
+        $this->db = (new MssqlFactory())->createConnection();
 
         DbHelper::ensureTable($this->db);
 

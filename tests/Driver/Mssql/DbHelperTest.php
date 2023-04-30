@@ -6,7 +6,7 @@ namespace Yiisoft\Translator\Message\Db\Tests\Driver\Mssql;
 
 use Yiisoft\Db\Schema\SchemaInterface;
 use Yiisoft\Translator\Message\Db\Tests\Common\AbstractDbHelperTest;
-use Yiisoft\Translator\Message\Db\Tests\Support\MssqlHelper;
+use Yiisoft\Translator\Message\Db\Tests\Support\MssqlFactory;
 
 /**
  * @group Mssql
@@ -22,7 +22,7 @@ final class DbHelperTest extends AbstractDbHelperTest
     protected function setUp(): void
     {
         // create connection dbms-specific
-        $this->db = (new MssqlHelper())->createConnection();
+        $this->db = (new MssqlFactory())->createConnection();
 
         // set table prefix
         $this->db->setTablePrefix('mssql_');
