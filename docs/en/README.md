@@ -25,25 +25,25 @@ for more information see [yiisoft/db](https://github.com/yiisoft/db/tree/master/
 For default tables:
 
 ```php
-Migration::ensureTable($db);
+DbHelper::ensureTable($db);
 ```
 
 For custom tables:
 
 ```php
-Migration::ensureTable($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
+DbHelper::ensureTable($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
 ```
 
 For dropping tables:
 
 ```php
-Migration::dropTable($db);
+DbHelper::dropTable($db);
 ```
 
 For custom tables:
 
 ```php
-Migration::dropTable($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
+DbHelper::dropTable($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
 ```
 
 **Step 3.** In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically. If not, the following DI container configuration is necessary:
