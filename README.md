@@ -28,7 +28,7 @@ with [`yiisoft/translator`](https://github.com/yiisoft/translator) package.
 
 ## Requirements
 
-- The minimum version of PHP required by this package is `8.0`.
+- PHP 8.0 or higher.
 - `json` PHP extension.
 
 ## Installation
