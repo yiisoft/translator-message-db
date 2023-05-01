@@ -46,8 +46,6 @@ For custom tables:
 DbHelper::dropTable($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
 ```
 
-**Step 3.** In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically. If not, the following DI container configuration is necessary:
-
 > Note: Additionally you can import the `RAW SQL` directly to create the tables.
 >
 >- [schema-mssql](/docs/en/migration/schema-mssql.sql).
@@ -55,6 +53,8 @@ DbHelper::dropTable($db, '{{%custom_source_message_table}}', '{{%custom_message_
 >- [schema-oracle](/docs/en/migration/schema-oci.sql).
 >- [schema-pgsql](/docs/en/migration/schema-pgsql.sql).
 >- [schema-sqlite](/docs/en/migration/schema-sqlite.sql).
+
+**Step 3.** In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically. If not, the following DI container configuration is necessary:
 
 ```php
 <?php
