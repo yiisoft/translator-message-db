@@ -9,6 +9,7 @@ use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
+use Yiisoft\Db\Exception\NotSupportedException;
 use Yiisoft\Db\Schema\SchemaInterface;
 use Yiisoft\Translator\Message\Db\DbHelper;
 
@@ -136,6 +137,22 @@ abstract class AbstractDbHelperTest extends TestCase
 
         $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
+    }
+
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
+    public function testSupportedDatabaseException(): void
+    {
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage('Database driver `unsupported` is not supported.');
+
+        $db = $this->createMock(ConnectionInterface::class);
+        $db->method('getDriverName')->willReturn('unsupported');
+
+        DbHelper::ensureTables($db);
     }
 
     /**

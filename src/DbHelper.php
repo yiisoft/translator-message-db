@@ -13,8 +13,12 @@ use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Exception\NotSupportedException;
 use Yiisoft\Db\Schema\SchemaInterface;
 
+use function sprintf;
+
 final class DbHelper
 {
+    private array $allowedDrivers = ['mysql', 'oci', 'pgsql', 'sqlite', 'sqlsrv'];
+
     /**
      * @throws Exception
      * @throws InvalidConfigException
@@ -30,6 +34,8 @@ final class DbHelper
         $schema = $db->getSchema();
         $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
         $tableRawNameMessage = $schema->getRawTableName($tableMessage);
+
+        self::validateSupportedDatabase($driverName);
 
         if (
             $schema->getTableSchema($tableSourceMessage, true) !== null &&
@@ -73,6 +79,8 @@ final class DbHelper
         $schema = $db->getSchema();
         $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
         $tableRawNameMessage = $schema->getRawTableName($tableMessage);
+
+        self::validateSupportedDatabase($driverName);
 
         // drop sequence for table `source_message` and `message`.
         if ($db->getTableSchema($tableMessage, true) !== null) {
@@ -331,5 +339,17 @@ final class DbHelper
 
         // create index for table `source_message` and `message`.
         self::createIndexForMigration($command, $tableRawNameSourceMessage, $tableRawNameMessage);
+    }
+
+    private static function validateSupportedDatabase(string $driverName): void
+    {
+        if (!in_array($driverName, ['mysql', 'oci', 'pgsql', 'sqlite', 'sqlsrv'], true)) {
+            throw new NotSupportedException(
+                sprintf(
+                    'Database driver `%s` is not supported.',
+                    $driverName,
+                ),
+            );
+        }
     }
 }
