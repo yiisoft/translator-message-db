@@ -38,7 +38,7 @@ abstract class AbstractMessageSourceTest extends TestCase
     protected function tearDown(): void
     {
         // drop table
-        DbHelper::dropTable($this->db);
+        DbHelper::dropTables($this->db);
 
         $this->db->close();
 

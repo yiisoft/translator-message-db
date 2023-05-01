@@ -28,7 +28,7 @@ final class MessageSourceTest extends AbstractMessageSourceTest
         // create connection dbms-specific
         $this->db = (new SqliteFactory())->createConnection();
 
-        DbHelper::ensureTable($this->db);
+        DbHelper::ensureTables($this->db);
 
         parent::setUp();
     }

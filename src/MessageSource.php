@@ -25,7 +25,7 @@ use function is_string;
 /**
  * Allows using a database as a message source for `yiisoft/translator`.
  *
- * Use the {@see DbHelper::ensureTable()} to initialize database schema.
+ * Use the {@see DbHelper::ensureTables()} to initialize database schema.
  */
 final class MessageSource implements MessageReaderInterface, MessageWriterInterface
 {

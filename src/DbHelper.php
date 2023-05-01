@@ -20,7 +20,7 @@ final class DbHelper
      * @throws InvalidConfigException
      * @throws Throwable
      */
-    public static function ensureTable(
+    public static function ensureTables(
         ConnectionInterface $db,
         string $tableSourceMessage = '{{%source_message}}',
         string $tableMessage = '{{%message}}',
@@ -63,7 +63,7 @@ final class DbHelper
      * @throws InvalidConfigException
      * @throws Throwable
      */
-    public static function dropTable(
+    public static function dropTables(
         ConnectionInterface $db,
         string $tableSourceMessage = '{{%source_message}}',
         string $tableMessage = '{{%message}}',

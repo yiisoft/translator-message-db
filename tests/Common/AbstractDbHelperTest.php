@@ -27,12 +27,12 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testDropTable(): void
     {
-        DbHelper::ensureTable($this->db);
+        DbHelper::ensureTables($this->db);
 
         $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
 
-        DbHelper::dropTable($this->db);
+        DbHelper::dropTables($this->db);
 
         $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%message}}', true));
@@ -45,12 +45,12 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testDropTableWithCustomTableName(): void
     {
-        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        DbHelper::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::dropTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
@@ -63,12 +63,12 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testEnsureTable(): void
     {
-        DbHelper::ensureTable($this->db);
+        DbHelper::ensureTables($this->db);
 
         $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
 
-        DbHelper::dropTable($this->db);
+        DbHelper::dropTables($this->db);
 
         $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%message}}', true));
@@ -81,12 +81,12 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testEnsureTableWithCustomTableName(): void
     {
-        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        DbHelper::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::dropTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
@@ -99,17 +99,17 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testEnsureTableExist(): void
     {
-        DbHelper::ensureTable($this->db);
+        DbHelper::ensureTables($this->db);
 
         $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
 
-        DbHelper::ensureTable($this->db);
+        DbHelper::ensureTables($this->db);
 
         $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
 
-        DbHelper::dropTable($this->db);
+        DbHelper::dropTables($this->db);
 
         $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%message}}', true));
@@ -122,17 +122,17 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testEnsureTableExistWithCustomTableName(): void
     {
-        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
 
-        DbHelper::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::dropTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
@@ -145,7 +145,7 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testVerifyTableStructure(): void
     {
-        DbHelper::ensureTable($this->db);
+        DbHelper::ensureTables($this->db);
 
         $prefix = $this->db->getTablePrefix();
         $driverName = $this->db->getDriverName();
@@ -187,7 +187,7 @@ abstract class AbstractDbHelperTest extends TestCase
 
         $this->assertSame($foreignKeysExpected, $tableSchema?->getForeignKeys());
 
-        DbHelper::dropTable($this->db, '{{%source_message}}', '{{%message}}');
+        DbHelper::dropTables($this->db, '{{%source_message}}', '{{%message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%message}}', true));
@@ -200,7 +200,7 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testVerifyTableStructureWithCustomTableName(): void
     {
-        DbHelper::ensureTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::ensureTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $prefix = $this->db->getTablePrefix();
         $driverName = $this->db->getDriverName();
@@ -242,7 +242,7 @@ abstract class AbstractDbHelperTest extends TestCase
 
         $this->assertSame($foreignKeysExpected, $tableSchema?->getForeignKeys());
 
-        DbHelper::dropTable($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        DbHelper::dropTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
         $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
         $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
