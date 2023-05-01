@@ -39,7 +39,7 @@ final class DbHelper
         }
 
         if ($driverName === 'sqlite') {
-            self::ensureTableSqlite(
+            self::createSchemaSqlite(
                 $command,
                 $schema,
                 $tableRawNameSourceMessage,
@@ -49,7 +49,7 @@ final class DbHelper
             return;
         }
 
-        self::ensureTableNotSqlite(
+        self::createSchema(
             $command,
             $driverName,
             $schema,
@@ -256,7 +256,7 @@ final class DbHelper
      * @throws NotSupportedException
      * @throws Throwable
      */
-    private static function ensureTableNotSqlite(
+    private static function createSchema(
         CommandInterface $command,
         string $driverName,
         SchemaInterface $schema,
@@ -299,7 +299,7 @@ final class DbHelper
      * @throws NotSupportedException
      * @throws Throwable
      */
-    private static function ensureTableSqlite(
+    private static function createSchemaSqlite(
         CommandInterface $command,
         SchemaInterface $schema,
         string $tableRawNameSourceMessage,
