@@ -31,7 +31,7 @@ DbHelper::ensureTable($db);
 For custom tables:
 
 ```php
-DbHelper::ensureTable($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
+DbHelper::ensureTables($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
 ```
 
 For dropping tables:
