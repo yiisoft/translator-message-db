@@ -17,8 +17,6 @@ use function sprintf;
 
 final class DbHelper
 {
-    private array $allowedDrivers = ['mysql', 'oci', 'pgsql', 'sqlite', 'sqlsrv'];
-
     /**
      * @throws Exception
      * @throws InvalidConfigException
