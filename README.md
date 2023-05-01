@@ -16,7 +16,7 @@ with [`yiisoft/translator`](https://github.com/yiisoft/translator) package.
 [![static analysis](https://github.com/yiisoft/translator-message-db/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/translator-message-db/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/translator-message-db/coverage.svg)](https://shepherd.dev/github/yiisoft/translator-message-db)
 
-## Support databases:
+## Supported databases
 
 |                      Packages                       |      PHP      |    Versions     |                                                                        CI-Actions                                                                         |
 |:---------------------------------------------------:|:-------------:|:---------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------:|
