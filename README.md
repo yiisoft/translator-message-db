@@ -11,12 +11,20 @@ with [`yiisoft/translator`](https://github.com/yiisoft/translator) package.
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/translator-message-db/v/stable.png)](https://packagist.org/packages/yiisoft/translator-message-db)
 [![Total Downloads](https://poser.pugx.org/yiisoft/translator-message-db/downloads.png)](https://packagist.org/packages/yiisoft/translator-message-db)
-[![Build status](https://github.com/yiisoft/translator-message-db/workflows/build/badge.svg)](https://github.com/yiisoft/translator-message-db/actions?query=workflow%3Abuild)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/yiisoft/translator-message-db/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/translator-message-db/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/yiisoft/translator-message-db/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/translator-message-db/?branch=master)
+[![codecov](https://codecov.io/gh/yiisoft/translator-message-db/branch/master/graph/badge.svg?token=H8PFGG5SWO)](https://codecov.io/gh/yiisoft/translator-message-db)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyiisoft%2Ftranslator-message-db%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/yiisoft/translator-message-db/master)
 [![static analysis](https://github.com/yiisoft/translator-message-db/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/translator-message-db/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/translator-message-db/coverage.svg)](https://shepherd.dev/github/yiisoft/translator-message-db)
+
+## Supported databases
+
+|                      Packages                       |      PHP      |    Versions     |                                                                        CI-Actions                                                                         |
+|:---------------------------------------------------:|:-------------:|:---------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|  [[db-mssql]](https://github.com/yiisoft/db-mssql)  | **8.0 - 8.2** | **2017 - 2022** |  [![mssql](https://github.com/yiisoft/translator-message-db/actions/workflows/mssql.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/mssql.yml)   | |
+|  [[db-mysql/mariadb]](https://github.com/yiisoft/db-mysql)  | **8.0 - 8.2** |  **5.7-8.0**/**10.4-10.10**  |  [![mysql](https://github.com/yiisoft/translator-message-db/actions/workflows/mysql.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/mysql.yml)   |
+| [[db-oracle]](https://github.com/yiisoft/db-oracle) | **8.0 - 8.2** |  **11C - 21C**  | [![oracle](https://github.com/yiisoft/translator-message-db/actions/workflows/oracle.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/oracle.yml) |
+|  [[db-pgsql]](https://github.com/yiisoft/db-pgsql)  | **8.0 - 8.2** | **9.0 - 15.0**  |  [![pgsql](https://github.com/yiisoft/translator-message-db/actions/workflows/pgsql.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/pgsql.yml)   |
+| [[db-sqlite]](https://github.com/yiisoft/db-sqlite) | **8.0 - 8.2** |  **3:latest**   | [![sqlite](https://github.com/yiisoft/translator-message-db/actions/workflows/sqlite.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/sqlite.yml) |
 
 ## Requirements
 
@@ -35,25 +43,44 @@ composer require yiisoft/translator-message-db --prefer-dist
 
 ### Quick start
 
-**Step 1.** You need a configured database connection (for example using [`yiisoft/db-sqlite`](https://github.com/yiisoft/db-sqlite))
-and [`yiisoft/yii-db-migration`](https://github.com/yiisoft/yii-db-migration) package.
+**Step 1.** You need a configured database connection for create migration and use in `yiisoft/translator-message-db` package,
+for more information see [yiisoft/db](https://github.com/yiisoft/db/tree/master/docs/en#create-connection).
 
-Add to `config/params.php`:
+**Step 2.** Create migration for `source_message` and `message` tables:
+
+For default tables:
+
 ```php
-...
-    'yiisoft/yii-db-migration' => [
-        'updateNamespace' => ['Yiisoft\\Translator\\Message\\Db\\migrations'],
-    ],
-...
+DbHelper::ensureTable($db);
 ```
 
-and run the following command in console for create tables for db storage:
+For custom tables:
 
-```shell
-./yii migrate/up
+```php
+DbHelper::ensureTables($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
 ```
 
-**Step 2.** In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically. If not, the following DI container configuration is necessary:
+For dropping tables:
+
+```php
+DbHelper::dropTables($db);
+```
+
+For custom tables:
+
+```php
+DbHelper::dropTable($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
+```
+
+> Note: Additionally you can import the `RAW SQL` directly to create the tables.
+>
+>- [schema-mssql](/docs/en/migration/schema-mssql.sql).
+>- [schema-mysql](/docs/en/migration/schema-mysql.sql).
+>- [schema-oracle](/docs/en/migration/schema-oci.sql).
+>- [schema-pgsql](/docs/en/migration/schema-pgsql.sql).
+>- [schema-sqlite](/docs/en/migration/schema-sqlite.sql).
+
+**Step 3.** In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically. If not, the following DI container configuration is necessary:
 
 ```php
 <?php
@@ -126,39 +153,14 @@ $data = [
 $messageSource->write($category, $language, $data);
 ```
 
+## Support
+
+If you need help or have a question, the [Yii Forum](https://forum.yiiframework.com/c/yii-3-0/db/68) is a good place for that.
+You may also check out other [Yii Community Resources](https://www.yiiframework.com/community).
+
 ## Testing
 
-### Unit testing
-
-The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
-
-```shell
-./vendor/bin/phpunit
-```
-
-### Mutation testing
-
-The package tests are checked with [Infection](https://infection.github.io/) mutation framework with
-[Infection Static Analysis Plugin](https://github.com/Roave/infection-static-analysis-plugin). To run it:
-
-```shell
-./vendor/bin/roave-infection-static-analysis-plugin
-```
-
-### Static analysis
-
-The code is statically analyzed with [Psalm](https://psalm.dev/). To run static analysis:
-
-```shell
-./vendor/bin/psalm
-```
-
-## License
-
-The Yii Translator DB Message Storage is free software. It is released under the terms of the BSD License.
-Please see [`LICENSE`](./LICENSE.md) for more information.
-
-Maintained by [Yii Software](https://www.yiiframework.com/).
+[Check the testing instructions](/docs/en/testing.md) to learn about testing.
 
 ## Support the project
 
@@ -171,3 +173,10 @@ Maintained by [Yii Software](https://www.yiiframework.com/).
 [![Telegram](https://img.shields.io/badge/telegram-join-1DA1F2?style=flat&logo=telegram)](https://t.me/yii3en)
 [![Facebook](https://img.shields.io/badge/facebook-join-1DA1F2?style=flat&logo=facebook&logoColor=ffffff)](https://www.facebook.com/groups/yiitalk)
 [![Slack](https://img.shields.io/badge/slack-join-1DA1F2?style=flat&logo=slack)](https://yiiframework.com/go/slack)
+
+## License
+
+The Yii Translator DB Message Storage is free software. It is released under the terms of the BSD License.
+Please see [`LICENSE`](./LICENSE.md) for more information.
+
+Maintained by [Yii Software](https://www.yiiframework.com/).
