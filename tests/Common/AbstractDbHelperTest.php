@@ -144,22 +144,6 @@ abstract class AbstractDbHelperTest extends TestCase
      * @throws InvalidConfigException
      * @throws Throwable
      */
-    public function testSupportedDatabaseException(): void
-    {
-        $this->expectException(NotSupportedException::class);
-        $this->expectExceptionMessage('Database driver `unsupported` is not supported.');
-
-        $db = $this->createMock(ConnectionInterface::class);
-        $db->method('getDriverName')->willReturn('unsupported');
-
-        DbHelper::ensureTables($db);
-    }
-
-    /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     public function testVerifyTableStructure(): void
     {
         DbHelper::ensureTables($this->db);

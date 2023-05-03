@@ -34,8 +34,6 @@ final class DbHelper
         $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
         $tableRawNameMessage = $schema->getRawTableName($tableMessage);
 
-        self::validateSupportedDatabase($driverName);
-
         if (
             $schema->getTableSchema($tableSourceMessage, true) !== null &&
             $schema->getTableSchema($tableMessage, true) !== null
@@ -78,8 +76,6 @@ final class DbHelper
         $schema = $db->getSchema();
         $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
         $tableRawNameMessage = $schema->getRawTableName($tableMessage);
-
-        self::validateSupportedDatabase($driverName);
 
         // drop sequence for table `source_message` and `message`.
         if ($db->getTableSchema($tableMessage, true) !== null) {
@@ -338,17 +334,5 @@ final class DbHelper
 
         // create index for table `source_message` and `message`.
         self::createIndexForMigration($command, $tableRawNameSourceMessage, $tableRawNameMessage);
-    }
-
-    private static function validateSupportedDatabase(string $driverName): void
-    {
-        if (!in_array($driverName, ['mysql', 'oci', 'pgsql', 'sqlite', 'sqlsrv'], true)) {
-            throw new NotSupportedException(
-                sprintf(
-                    'Database driver `%s` is not supported.',
-                    $driverName,
-                ),
-            );
-        }
     }
 }
