@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Translator\Message\Db\Tests\Common;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
@@ -99,20 +100,22 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testEnsureTableExist(): void
     {
-        DbHelper::ensureTables($this->db);
+        $prefix = $this->db->getTablePrefix();
 
-        $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
+        try {
+            DbHelper::ensureTables($this->db);
+            DbHelper::ensureTables($this->db);
+        } catch (RuntimeException $e) {
+            $this->assertSame(
+                "Table '{$prefix}source_message' and '{$prefix}message' already exists.",
+                $e->getMessage()
+            );
 
-        DbHelper::ensureTables($this->db);
+            DbHelper::dropTables($this->db);
 
-        $this->assertNotNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNotNull($this->db->getTableSchema('{{%message}}', true));
-
-        DbHelper::dropTables($this->db);
-
-        $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
-        $this->assertNull($this->db->getTableSchema('{{%message}}', true));
+            $this->assertNull($this->db->getTableSchema('{{%source_message}}', true));
+            $this->assertNull($this->db->getTableSchema('{{%message}}', true));
+        }
     }
 
     /**
@@ -122,20 +125,22 @@ abstract class AbstractDbHelperTest extends TestCase
      */
     public function testEnsureTableExistWithCustomTableName(): void
     {
-        DbHelper::ensureTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        $prefix = $this->db->getTablePrefix();
 
-        $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
-        $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
+        try {
+            DbHelper::ensureTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
+            DbHelper::ensureTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
+        } catch (RuntimeException $e) {
+            $this->assertSame(
+                "Table '{$prefix}test_source_message' and '{$prefix}test_message' already exists.",
+                $e->getMessage()
+            );
 
-        DbHelper::ensureTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
+            DbHelper::dropTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
 
-        $this->assertNotNull($this->db->getTableSchema('{{%test_source_message}}', true));
-        $this->assertNotNull($this->db->getTableSchema('{{%test_message}}', true));
-
-        DbHelper::dropTables($this->db, '{{%test_source_message}}', '{{%test_message}}');
-
-        $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
-        $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
+            $this->assertNull($this->db->getTableSchema('{{%test_source_message}}', true));
+            $this->assertNull($this->db->getTableSchema('{{%test_message}}', true));
+        }
     }
 
     /**

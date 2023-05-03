@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db;
 
+use RuntimeException;
 use Throwable;
 use Yiisoft\Db\Command\CommandInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
@@ -31,11 +32,10 @@ final class DbHelper
         $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
         $tableRawNameMessage = $schema->getRawTableName($tableMessage);
 
-        if (
-            $schema->getTableSchema($tableSourceMessage, true) !== null &&
-            $schema->getTableSchema($tableMessage, true) !== null
-        ) {
-            return;
+        if (self::hasTable($db, $tableSourceMessage) && self::hasTable($db, $tableMessage)) {
+            throw new RuntimeException(
+                "Table '{$tableRawNameSourceMessage}' and '{$tableRawNameMessage}' already exists."
+            );
         }
 
         if ($driverName === 'sqlite') {
@@ -75,7 +75,7 @@ final class DbHelper
         $tableRawNameMessage = $schema->getRawTableName($tableMessage);
 
         // drop sequence for table `source_message` and `message`.
-        if ($db->getTableSchema($tableMessage, true) !== null) {
+        if (self::hasTable($db, $tableMessage)) {
             // drop foreign key for table `message`.
             if ($driverName !== 'sqlite' && $schema->getTableForeignKeys($tableMessage, true) !== []) {
                 $command->dropForeignKey(
@@ -85,7 +85,7 @@ final class DbHelper
             }
 
             // drop table `message`.
-            $command->dropTable($tableMessage)->execute();
+            $command->dropTable($tableRawNameMessage)->execute();
 
             if ($driverName === 'oci') {
                 $command->setSql(
@@ -96,9 +96,9 @@ final class DbHelper
             }
         }
 
-        if ($db->getTableSchema($tableSourceMessage, true) !== null) {
+        if (self::hasTable($db, $tableSourceMessage)) {
             // drop table `source_message`.
-            $command->dropTable($tableSourceMessage)->execute();
+            $command->dropTable($tableRawNameSourceMessage)->execute();
 
             if ($driverName === 'oci') {
                 $command->setSql(
@@ -331,5 +331,10 @@ final class DbHelper
 
         // create index for table `source_message` and `message`.
         self::createIndexForMigration($command, $tableRawNameSourceMessage, $tableRawNameMessage);
+    }
+
+    private static function hasTable(ConnectionInterface $db, string $table): bool
+    {
+        return $db->getTableSchema($table, true) !== null;
     }
 }
