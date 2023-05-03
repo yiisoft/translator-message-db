@@ -9,7 +9,6 @@ use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
-use Yiisoft\Db\Exception\NotSupportedException;
 use Yiisoft\Db\Schema\SchemaInterface;
 use Yiisoft\Translator\Message\Db\DbHelper;
 
