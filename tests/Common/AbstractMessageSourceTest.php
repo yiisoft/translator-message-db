@@ -2,26 +2,62 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Translator\Message\Db\Tests;
+namespace Yiisoft\Translator\Message\Db\Tests\Common;
 
-use InvalidArgumentException;
+use JsonException;
 use PHPUnit\Framework\TestCase;
+use Throwable;
+use Yiisoft\Cache\ArrayCache;
+use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Exception\Exception;
+use Yiisoft\Db\Exception\InvalidArgumentException;
+use Yiisoft\Db\Exception\InvalidCallException;
+use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Translator\Message\Db\MessageSource;
+use Yiisoft\Translator\Message\Db\DbHelper;
 
-/**
- * @psalm-suppress PropertyNotSetInConstructor
- */
 abstract class AbstractMessageSourceTest extends TestCase
 {
     protected CacheInterface $cache;
     protected ConnectionInterface $db;
 
+    protected function setup(): void
+    {
+        $this->cache = new Cache(new ArrayCache());
+
+        parent::setup();
+    }
+
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
+    protected function tearDown(): void
+    {
+        // drop table
+        DbHelper::dropTables($this->db);
+
+        $this->db->close();
+
+        unset($this->db, $this->cache);
+
+        parent::tearDown();
+    }
+
     /**
      * @dataProvider generateTranslationsData
      *
      * @psalm-param array<string, array<string, string>> $data
+     *
+     * @throws Exception
+     * @throws JsonException
+     * @throws InvalidArgumentException
+     * @throws InvalidCallException
+     * @throws InvalidConfigException
+     * @throws Throwable
      */
     public function testWrite(string $category, string $locale, array $data): void
     {
@@ -37,6 +73,11 @@ abstract class AbstractMessageSourceTest extends TestCase
      * @dataProvider generateFailTranslationsData
      *
      * @psalm-param array<string, array<string, string>> $data
+     *
+     * @throws Exception
+     * @throws InvalidCallException
+     * @throws InvalidConfigException
+     * @throws Throwable
      */
     public function testWriteWithFailData(string $category, string $locale, array $data): void
     {
@@ -46,9 +87,17 @@ abstract class AbstractMessageSourceTest extends TestCase
         $messageSource->write($category, $locale, $data);
     }
 
+    /**
+     * @throws Exception
+     * @throws JsonException
+     * @throws InvalidArgumentException
+     * @throws InvalidCallException
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
     public function testMultiWrite(): void
     {
-        $allData = $this->generateTranslationsData();
+        $allData = self::generateTranslationsData();
 
         $messageSource = new MessageSource($this->db);
 
@@ -69,6 +118,14 @@ abstract class AbstractMessageSourceTest extends TestCase
         }
     }
 
+    /**
+     * @throws Exception
+     * @throws JsonException
+     * @throws InvalidArgumentException
+     * @throws InvalidCallException
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
     public function testUpdate(): void
     {
         $updatedData = [
@@ -118,9 +175,17 @@ abstract class AbstractMessageSourceTest extends TestCase
         }
     }
 
+    /**
+     * @throws Exception
+     * @throws JsonException
+     * @throws InvalidArgumentException
+     * @throws InvalidCallException
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
     public function testMultiWriteWithCache(): void
     {
-        $allData = $this->generateTranslationsData();
+        $allData = self::generateTranslationsData();
 
         $messageSource = new MessageSource($this->db, $this->cache);
 
@@ -144,6 +209,13 @@ abstract class AbstractMessageSourceTest extends TestCase
      * @dataProvider generateTranslationsData
      *
      * @psalm-param array<string, array<string, string>> $data
+     *
+     * @throws Exception
+     * @throws JsonException
+     * @throws InvalidArgumentException
+     * @throws InvalidCallException
+     * @throws InvalidConfigException
+     * @throws Throwable
      */
     public function testReadMessages(string $category, string $locale, array $data): void
     {

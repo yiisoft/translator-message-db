@@ -19,14 +19,14 @@ on:
       - 'infection.json.dist'
       - 'psalm.xml'
 
-name: db-pgsql
+name: oracle
 
 jobs:
   tests:
-    name: PHP ${{ matrix.php }}-pgsql-${{ matrix.pgsql }}
+    name: PHP ${{ matrix.php }}-oracle-${{ matrix.oracle }}
 
     env:
-      extensions: pdo, pdo_pgsql
+      extensions: pdo, pdo_oci, oci8
 
     runs-on: ${{ matrix.os }}
 
@@ -40,25 +40,24 @@ jobs:
           - 8.1
           - 8.2
 
-        pgsql:
-          - 9
-          - 10
-          - 11
-          - 12
-          - 13
-          - 14
-          - 15
+        oracle:
+          - 18
+          - 21
 
     services:
-      postgres:
-        image: postgres:${{ matrix.pgsql }}
-        env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: root
-          POSTGRES_DB: yiitest
+      oci:
+        image: gvenzl/oracle-xe:${{ matrix.oracle }}
         ports:
-          - 5432:5432
-        options: --name=postgres --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+          - 1521:1521
+        env:
+          ORACLE_DATABASE : yiitest
+          ORACLE_PASSWORD : root
+        options: >-
+          --name=oci
+          --health-cmd healthcheck.sh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - name: Checkout.
@@ -71,15 +70,16 @@ jobs:
           extensions: ${{ env.extensions }}
           ini-values: date.timezone='UTC'
           coverage: pcov
+          tools: composer:v2
 
       - name: Update composer.
         run: composer self-update
 
-      - name: Install db-pgsql.
-        run: composer require yiisoft/db-pgsql --no-interaction --no-progress --optimize-autoloader --ansi
+      - name: Install db-oracle.
+        run: composer require yiisoft/db-oracle --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
-      - name: Run pgsql tests with phpunit and code coverage.
-        run: vendor/bin/phpunit --testsuite Pgsql --coverage-clover=coverage.xml --colors=always
+      - name: Run tests with phpunit.
+        run: vendor/bin/phpunit --testsuite=Oracle --coverage-clover=coverage.xml --colors=always
 
       - name: Upload coverage to Codecov.
         if: matrix.php == '8.1'

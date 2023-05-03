@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db;
 
-use InvalidArgumentException;
+use JsonException;
 use RuntimeException;
+use Throwable;
 use Yiisoft\Arrays\ArrayHelper;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Exception\Exception;
+use Yiisoft\Db\Exception\InvalidArgumentException;
+use Yiisoft\Db\Exception\InvalidCallException;
+use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Expression\Expression;
 use Yiisoft\Db\Query\Query;
 use Yiisoft\Translator\MessageReaderInterface;
@@ -17,24 +22,33 @@ use Yiisoft\Translator\MessageWriterInterface;
 use function array_key_exists;
 use function is_string;
 
+/**
+ * Allows using a database as a message source for `yiisoft/translator`.
+ *
+ * Use the {@see DbHelper::ensureTables()} to initialize database schema.
+ */
 final class MessageSource implements MessageReaderInterface, MessageWriterInterface
 {
     /**
      * @psalm-var array<string, array<string, array<string, array<string, string>>>>
      */
     private array $messages = [];
-    private string $sourceMessageTable = '{{%source_message}}';
-    private string $messageTable = '{{%message}}';
-    private int $cachingDuration = 3600;
 
     public function __construct(
         private ConnectionInterface $db,
         private CacheInterface|null $cache = null,
-        int $cacheDuration = 3600
+        private string $sourceMessageTable = '{{%source_message}}',
+        private string $messageTable = '{{%message}}',
+        private int $cachingDuration = 3600
     ) {
-        $this->cachingDuration = $cacheDuration;
     }
 
+    /**
+     * @throws Exception
+     * @throws JsonException
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
     public function getMessage(string $id, string $category, string $locale, array $parameters = []): string|null
     {
         if (!isset($this->messages[$category][$locale])) {
@@ -44,6 +58,12 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         return $this->messages[$category][$locale][$id]['message'] ?? null;
     }
 
+    /**
+     * @throws Exception
+     * @throws JsonException
+     * @throws InvalidConfigException
+     * @throws Throwable
+     */
     public function getMessages(string $category, string $locale): array
     {
         if (!isset($this->messages[$category][$locale])) {
@@ -55,6 +75,12 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
     /**
      * @psalm-param array<string, array<string, string>> $messages
+     *
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws InvalidCallException
+     * @throws InvalidConfigException
+     * @throws Throwable
      */
     public function write(string $category, string $locale, array $messages): void
     {
@@ -89,7 +115,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                     $comment = $messageData['comment'];
                 }
 
-                /** @psalm-var array<string,string>|false */
+                /** @psalm-var array<string,string>|false $result */
                 $result = $this->db
                     ->createCommand()
                     ->insertWithReturningPks(
@@ -138,6 +164,11 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
     /**
      * @psalm-return array<string, array<string, string>>
+     *
+     * @throws Exception
+     * @throws JsonException
+     * @throws InvalidConfigException
+     * @throws Throwable
      */
     private function read(string $category, string $locale): array
     {
@@ -145,9 +176,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             /** @psalm-var array<string, array<string, string>> */
             return $this->cache->getOrSet(
                 $this->getCacheKey($category, $locale),
-                function () use ($category, $locale) {
-                    return $this->readFromDb($category, $locale);
-                },
+                fn() => $this->readFromDb($category, $locale),
                 $this->cachingDuration
             );
         }
@@ -157,6 +186,10 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
     /**
      * @psalm-return array<string, array<string, string>>
+     *
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws Throwable
      */
     private function readFromDb(string $category, string $locale): array
     {
@@ -172,22 +205,23 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             )
             ->where(['locale' => $locale]);
 
-        /** @psalm-var array<int, array<string, string>> */
+        /** @psalm-var array<int, array<string, string>> $messages */
         $messages = $query->all();
 
         /** @psalm-var array<string, array<string, string>> */
-        return ArrayHelper::map($messages, 'message_id', static function (array $message): array {
-            return array_merge(
-                ['message' => $message['translation']],
-                !empty($message['comment']) ? ['comment' => $message['comment']] : []
-            );
-        });
+        return ArrayHelper::map($messages, 'message_id', static fn(array $message): array => array_merge(
+            ['message' => $message['translation']],
+            !empty($message['comment']) ? ['comment' => $message['comment']] : []
+        ));
     }
 
+    /**
+     * @throws JsonException
+     */
     private function getCacheKey(string $category, string $locale): string
     {
-        $key = [__CLASS__, $category, $locale];
-        $jsonKey = json_encode($key);
+        $key = [self::class, $category, $locale];
+        $jsonKey = json_encode($key, JSON_THROW_ON_ERROR);
 
         return md5($jsonKey);
     }
