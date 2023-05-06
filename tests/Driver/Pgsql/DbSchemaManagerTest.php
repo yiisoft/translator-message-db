@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db\Tests\Driver\Pgsql;
 
-use Yiisoft\Translator\Message\Db\Tests\Common\AbstractDbHelperTest;
+use Yiisoft\Translator\Message\Db\Tests\Common\AbstractDbSchemaManagerTest;
 use Yiisoft\Translator\Message\Db\Tests\Support\PgsqlFactory;
 
 /**
@@ -12,7 +12,7 @@ use Yiisoft\Translator\Message\Db\Tests\Support\PgsqlFactory;
  *
  * @psalm-suppress PropertyNotSetInConstructor
  */
-final class DbHelperTest extends AbstractDbHelperTest
+final class DbSchemaManagerTest extends AbstractDbSchemaManagerTest
 {
     protected function setUp(): void
     {

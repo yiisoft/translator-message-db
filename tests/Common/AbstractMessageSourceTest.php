@@ -15,17 +15,25 @@ use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidArgumentException;
 use Yiisoft\Db\Exception\InvalidCallException;
 use Yiisoft\Db\Exception\InvalidConfigException;
+use Yiisoft\Translator\Message\Db\DbSchemaManager;
 use Yiisoft\Translator\Message\Db\MessageSource;
-use Yiisoft\Translator\Message\Db\DbHelper;
 
 abstract class AbstractMessageSourceTest extends TestCase
 {
     protected CacheInterface $cache;
     protected ConnectionInterface $db;
+    protected DbSchemaManager $dbSchemaManager;
 
     protected function setup(): void
     {
+        // create cache
         $this->cache = new Cache(new ArrayCache());
+
+        // create db schema manager
+        $this->dbSchemaManager = new DbSchemaManager($this->db);
+
+        // create tables
+        $this->dbSchemaManager->ensureTables();
 
         parent::setup();
     }
@@ -38,11 +46,11 @@ abstract class AbstractMessageSourceTest extends TestCase
     protected function tearDown(): void
     {
         // drop table
-        DbHelper::dropTables($this->db);
+        $this->dbSchemaManager->ensureNoTables();
 
         $this->db->close();
 
-        unset($this->db, $this->cache);
+        unset($this->cache, $this->db, $this->dbSchemaManager);
 
         parent::tearDown();
     }

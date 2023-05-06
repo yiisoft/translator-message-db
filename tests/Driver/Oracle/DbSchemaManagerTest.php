@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db\Tests\Driver\Oracle;
 
-use Yiisoft\Translator\Message\Db\Tests\Common\AbstractDbHelperTest;
+use Yiisoft\Translator\Message\Db\Tests\Common\AbstractDbSchemaManagerTest;
 use Yiisoft\Translator\Message\Db\Tests\Support\OracleFactory;
 
 /**
@@ -12,7 +12,7 @@ use Yiisoft\Translator\Message\Db\Tests\Support\OracleFactory;
  *
  * @psalm-suppress PropertyNotSetInConstructor
  */
-final class DbHelperTest extends AbstractDbHelperTest
+final class DbSchemaManagerTest extends AbstractDbSchemaManagerTest
 {
     protected function setUp(): void
     {

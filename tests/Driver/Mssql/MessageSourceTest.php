@@ -7,7 +7,6 @@ namespace Yiisoft\Translator\Message\Db\Tests\Driver\Mssql;
 use Throwable;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
-use Yiisoft\Translator\Message\Db\DbHelper;
 use Yiisoft\Translator\Message\Db\Tests\Common\AbstractMessageSourceTest;
 use Yiisoft\Translator\Message\Db\Tests\Support\MssqlFactory;
 
@@ -27,8 +26,6 @@ final class MessageSourceTest extends AbstractMessageSourceTest
     {
         // create connection dbms-specific
         $this->db = (new MssqlFactory())->createConnection();
-
-        DbHelper::ensureTables($this->db);
 
         parent::setUp();
     }

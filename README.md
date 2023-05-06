@@ -39,48 +39,40 @@ The package could be installed with composer:
 composer require yiisoft/translator-message-db --prefer-dist
 ```
 
+## Create database connection
+
+For more information see [yiisoft/db](https://github.com/yiisoft/db/tree/master/docs/en#create-connection).
+
+## Database Preparing
+
+Package provides two way for preparing database:
+
+1. Raw SQL. You can use it with the migration package used in your application.
+
+    - Ensure tables:
+        - [MSSQL](/sql/sqlsrv-up.sql),
+        - [MySQL / MariaDB](/sql/mysql-up.sql),
+        - [Oracle](/sql/oci-up.sql),
+        - [PostgreSQL](/sql/pgsql-up.sql)
+        - [SQLite](/sql/sqlite-up.sql)
+    
+    - Ensure no tables:
+        - [MSSQL](/sql/sqlsrv-down.sql),
+        - [MySQL / MariaDB](/sql/mysql-down.sql),
+        - [Oracle](/sql/oci-down.sql),
+        - [PostgreSQL](/sql/pgsql-down.sql)
+        - [SQLite](/sql/sqlite-down.sql)
+
+2. `DbSchemaManager` for `ensureTables()`, `ensureNoTables()` methods for translator tables
+(by default `{{%yii_source_message}}` and `{{%yii_message}}`).
+
 ## Configuration
 
 ### Quick start
 
-**Step 1.** You need a configured database connection for create migration and use in `yiisoft/translator-message-db` package,
-for more information see [yiisoft/db](https://github.com/yiisoft/db/tree/master/docs/en#create-connection).
 
-**Step 2.** Create migration for `source_message` and `message` tables:
-
-For default tables:
-
-```php
-DbHelper::ensureTable($db);
-```
-
-For custom tables:
-
-```php
-DbHelper::ensureTables($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
-```
-
-For dropping tables:
-
-```php
-DbHelper::dropTables($db);
-```
-
-For custom tables:
-
-```php
-DbHelper::dropTable($db, '{{%custom_source_message_table}}', '{{%custom_message_table}}');
-```
-
-> Note: Additionally you can import the `RAW SQL` directly to create the tables.
->
->- [schema-mssql](/docs/en/migration/schema-mssql.sql).
->- [schema-mysql](/docs/en/migration/schema-mysql.sql).
->- [schema-oracle](/docs/en/migration/schema-oci.sql).
->- [schema-pgsql](/docs/en/migration/schema-pgsql.sql).
->- [schema-sqlite](/docs/en/migration/schema-sqlite.sql).
-
-**Step 3.** In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically. If not, the following DI container configuration is necessary:
+In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically.
+If not, the following DI container configuration is necessary:
 
 ```php
 <?php
