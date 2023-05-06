@@ -88,7 +88,7 @@ abstract class AbstractSQLDumpFileTest extends TestCase
         $this->assertSame($this->translationType, $tableSchema?->getColumn('translation')->getType());
 
         $foreignKeysExpected = [
-            "FK_yii_source_message_yii_message" => [
+            'FK_yii_source_message_yii_message' => [
                 0 => 'yii_source_message',
                 'id' => 'id',
             ],
