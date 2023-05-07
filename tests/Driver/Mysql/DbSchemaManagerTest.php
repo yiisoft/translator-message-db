@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db\Tests\Driver\Mysql;
 
-use Throwable;
-use Yiisoft\Db\Exception\Exception;
-use Yiisoft\Db\Exception\InvalidConfigException;
-use Yiisoft\Translator\Message\Db\Tests\Common\AbstractMessageSourceTest;
+use Yiisoft\Translator\Message\Db\Tests\Common\AbstractDbSchemaManagerTest;
 use Yiisoft\Translator\Message\Db\Tests\Support\MysqlFactory;
 
 /**
@@ -15,17 +12,15 @@ use Yiisoft\Translator\Message\Db\Tests\Support\MysqlFactory;
  *
  * @psalm-suppress PropertyNotSetInConstructor
  */
-final class MessageSourceTest extends AbstractMessageSourceTest
+final class DbSchemaManagerTest extends AbstractDbSchemaManagerTest
 {
-    /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     protected function setUp(): void
     {
         // create connection dbms-specific
         $this->db = (new MysqlFactory())->createConnection();
+
+        // set table prefix
+        $this->db->setTablePrefix('mysql_');
 
         parent::setUp();
     }

@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db\Tests\Driver\Pgsql;
 
-use Throwable;
-use Yiisoft\Db\Exception\Exception;
-use Yiisoft\Db\Exception\InvalidConfigException;
-use Yiisoft\Translator\Message\Db\Tests\Common\AbstractMessageSourceTest;
+use Yiisoft\Translator\Message\Db\Tests\Common\AbstractSQLDumpFileTest;
 use Yiisoft\Translator\Message\Db\Tests\Support\PgsqlFactory;
 
 /**
@@ -15,13 +12,8 @@ use Yiisoft\Translator\Message\Db\Tests\Support\PgsqlFactory;
  *
  * @psalm-suppress PropertyNotSetInConstructor
  */
-final class MessageSourceTest extends AbstractMessageSourceTest
+final class SQLDumpFileTest extends AbstractSQLDumpFileTest
 {
-    /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     protected function setUp(): void
     {
         // create connection dbms-specific

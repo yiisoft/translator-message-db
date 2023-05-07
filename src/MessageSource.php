@@ -25,7 +25,7 @@ use function is_string;
 /**
  * Allows using a database as a message source for `yiisoft/translator`.
  *
- * Use the {@see DbHelper::ensureTables()} to initialize database schema.
+ * Use the {@see DbSchemaManager::ensureTables()} to initialize database schema.
  */
 final class MessageSource implements MessageReaderInterface, MessageWriterInterface
 {
@@ -37,8 +37,8 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
     public function __construct(
         private ConnectionInterface $db,
         private CacheInterface|null $cache = null,
-        private string $sourceMessageTable = '{{%source_message}}',
-        private string $messageTable = '{{%message}}',
+        private string $sourceMessageTable = '{{%yii_source_message}}',
+        private string $messageTable = '{{%yii_message}}',
         private int $cachingDuration = 3600
     ) {
     }
@@ -176,7 +176,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             /** @psalm-var array<string, array<string, string>> */
             return $this->cache->getOrSet(
                 $this->getCacheKey($category, $locale),
-                fn() => $this->readFromDb($category, $locale),
+                fn () => $this->readFromDb($category, $locale),
                 $this->cachingDuration
             );
         }
@@ -209,7 +209,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
         $messages = $query->all();
 
         /** @psalm-var array<string, array<string, string>> */
-        return ArrayHelper::map($messages, 'message_id', static fn(array $message): array => array_merge(
+        return ArrayHelper::map($messages, 'message_id', static fn (array $message): array => array_merge(
             ['message' => $message['translation']],
             !empty($message['comment']) ? ['comment' => $message['comment']] : []
         ));
