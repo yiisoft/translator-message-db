@@ -214,7 +214,7 @@ final class DbSchemaManager
     }
 
     /**
-     * Create schema for tables '{{%yii_source_message}}' and '{{%yii_message}}'.
+     * Create schema for tables in the database.
      *
      * @throws Exception
      * @throws InvalidArgumentException
