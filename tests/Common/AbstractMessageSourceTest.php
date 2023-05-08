@@ -6,15 +6,18 @@ namespace Yiisoft\Translator\Message\Db\Tests\Common;
 
 use JsonException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Throwable;
 use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\CacheInterface;
+use Yiisoft\Db\Command\CommandInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidArgumentException;
 use Yiisoft\Db\Exception\InvalidCallException;
 use Yiisoft\Db\Exception\InvalidConfigException;
+use Yiisoft\Db\QueryBuilder\QueryBuilderInterface;
 use Yiisoft\Translator\Message\Db\DbSchemaManager;
 use Yiisoft\Translator\Message\Db\MessageSource;
 
@@ -233,6 +236,40 @@ abstract class AbstractMessageSourceTest extends TestCase
         $messages = $messageSource->getMessages($category, $locale);
 
         $this->assertEquals($messages, $data);
+    }
+
+    public function testReadMessageError(): void
+    {
+        $qbMock = $this->createMock(QueryBuilderInterface::class);
+        $qbMock->expects(self::atLeastOnce())
+            ->method('build')
+            ->willReturn(['', []]);
+
+        $commandMock = $this->createMock(CommandInterface::class);
+        $commandMock->expects(self::once())
+            ->method('insertWithReturningPks')
+            ->willReturn(false);
+        $commandMock->expects(self::atLeastOnce())
+            ->method('queryAll')
+            ->willReturn([]);
+
+        $dbMock = $this->createMock(ConnectionInterface::class);
+        $dbMock->expects(self::atLeastOnce())
+            ->method('createCommand')
+            ->willReturn($commandMock);
+        $dbMock->expects(self::atLeastOnce())
+            ->method('getQueryBuilder')
+            ->willReturn($qbMock);
+
+        $messageSource = new MessageSource($dbMock);
+
+        $this->expectException(RuntimeException::class);
+        $messageSource->write('app', 'de', [
+            'test.id1' => [
+                'comment' => 'Translate wisely!',
+                'message' => 'app: Test 1 on the (de)',
+            ]
+        ]);
     }
 
     /**
