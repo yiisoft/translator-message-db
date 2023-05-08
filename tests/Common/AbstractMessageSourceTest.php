@@ -268,7 +268,7 @@ abstract class AbstractMessageSourceTest extends TestCase
             'test.id1' => [
                 'comment' => 'Translate wisely!',
                 'message' => 'app: Test 1 on the (de)',
-            ]
+            ],
         ]);
     }
 
