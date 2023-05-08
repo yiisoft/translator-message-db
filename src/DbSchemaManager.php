@@ -297,7 +297,7 @@ final class DbSchemaManager
     }
 
     /**
-     * Create schema for tables '{{%yii_source_message}}' and '{{%yii_message}}' for SQLite.
+     * Create schema for tables in SQLite database.
      *
      * @throws Exception
      * @throws InvalidArgumentException
