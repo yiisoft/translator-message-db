@@ -18,8 +18,6 @@
         "chat": "https://t.me/yii3en",
         "source": "https://github.com/yiisoft/translator-message-db"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "require": {
         "php": "^8.0",
         "ext-json": "*",
@@ -47,9 +45,6 @@
         }
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "3.0.x-dev"
-        },
         "config-plugin-options": {
             "source-directory": "config"
         }
