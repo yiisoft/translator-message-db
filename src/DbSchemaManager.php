@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Yiisoft\Translator\Message\Db;
 
 use Throwable;
-use Yiisoft\Db\Command\CommandInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidArgumentException;
@@ -13,20 +12,21 @@ use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Exception\NotSupportedException;
 use Yiisoft\Db\Schema\SchemaInterface;
 
+/**
+ * Manages the translator tables schema in the database.
+ */
 final class DbSchemaManager
 {
-    private CommandInterface $command;
-    private string $driverName;
-    private SchemaInterface $schema;
-
     public function __construct(private ConnectionInterface $db)
     {
-        $this->command = $db->createCommand();
-        $this->driverName = $db->getDriverName();
-        $this->schema = $db->getSchema();
     }
 
     /**
+     * Ensures that the translator tables exists in the database.
+     *
+     * @param string $table The name of the translator tables.
+     * Defaults to '{{%yii_source_message}}', '{{%yii_message}}'.
+     *
      * @throws Exception
      * @throws InvalidConfigException
      * @throws Throwable
@@ -35,15 +35,18 @@ final class DbSchemaManager
         string $tableSourceMessage = '{{%yii_source_message}}',
         string $tableMessage = '{{%yii_message}}',
     ): void {
-        $tableRawNameSourceMessage = $this->schema->getRawTableName($tableSourceMessage);
-        $tableRawNameMessage = $this->schema->getRawTableName($tableMessage);
+        $driverName = $this->db->getDriverName();
+        $schema = $this->db->getSchema();
+        $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
+        $tableRawNameMessage = $schema->getRawTableName($tableMessage);
 
         if ($this->hasTable($tableSourceMessage) && $this->hasTable($tableMessage)) {
             return;
         }
 
-        if ($this->driverName === 'sqlite') {
+        if ($driverName === 'sqlite') {
             $this->createSchemaSqlite(
+                $schema,
                 $tableSourceMessage,
                 $tableRawNameSourceMessage,
                 $tableMessage,
@@ -53,10 +56,22 @@ final class DbSchemaManager
             return;
         }
 
-        $this->createSchema($tableSourceMessage, $tableRawNameSourceMessage, $tableMessage, $tableRawNameMessage);
+        $this->createSchema(
+            $schema,
+            $driverName,
+            $tableSourceMessage,
+            $tableRawNameSourceMessage,
+            $tableMessage,
+            $tableRawNameMessage,
+        );
     }
 
     /**
+     * Ensures that the translator tables does not exist in the database.
+     *
+     * @param string $table The name of the translator tables.
+     * Defaults to '{{%yii_source_message}}', '{{%yii_message}}'.
+     *
      * @throws Exception
      * @throws InvalidConfigException
      * @throws Throwable
@@ -65,91 +80,119 @@ final class DbSchemaManager
         string $tableSourceMessage = '{{%yii_source_message}}',
         string $tableMessage = '{{%yii_message}}',
     ): void {
-        $tableRawNameSourceMessage = $this->schema->getRawTableName($tableSourceMessage);
-        $tableRawNameMessage = $this->schema->getRawTableName($tableMessage);
+        $driverName = $this->db->getDriverName();
+        $schema = $this->db->getSchema();
+        $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
+        $tableRawNameMessage = $schema->getRawTableName($tableMessage);
 
-        // drop sequence for table `source_message` and `message`.
         if ($this->hasTable($tableMessage)) {
-            // drop foreign key for table `message`.
-            if ($this->driverName !== 'sqlite' && $this->schema->getTableForeignKeys($tableMessage, true) !== []) {
-                $this->command->dropForeignKey(
-                    $tableRawNameMessage,
-                    "{{FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}}}",
-                )->execute();
+            if ($driverName !== 'sqlite' && $schema->getTableForeignKeys($tableMessage, true) !== []) {
+                // drop foreign key for table `yii_message`.
+                $this->db
+                    ->createCommand()
+                    ->dropForeignKey(
+                        $tableRawNameMessage,
+                        "{{FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}}}",
+                    )
+                    ->execute();
             }
 
-            // drop table `message`.
-            $this->command->dropTable($tableRawNameMessage)->execute();
+            // drop table `yii_message`.
+            $this->db->createCommand()->dropTable($tableRawNameMessage)->execute();
 
-            if ($this->driverName === 'oci') {
-                $this->command->setSql(
-                    <<<SQL
-                    DROP SEQUENCE {{{$tableRawNameMessage}_SEQ}}
-                    SQL,
-                )->execute();
+            if ($driverName === 'oci') {
+                // drop sequence for table `yii_message`.
+                $this->db
+                    ->createCommand()
+                    ->setSql(
+                        <<<SQL
+                        DROP SEQUENCE {{{$tableRawNameMessage}_SEQ}}
+                        SQL,
+                    )
+                    ->execute();
             }
         }
 
         if ($this->hasTable($tableSourceMessage)) {
-            // drop table `source_message`.
-            $this->command->dropTable($tableRawNameSourceMessage)->execute();
+            // drop table `yii_source_message`.
+            $this->db->createCommand()->dropTable($tableRawNameSourceMessage)->execute();
 
-            if ($this->driverName === 'oci') {
-                $this->command->setSql(
-                    <<<SQL
-                    DROP SEQUENCE {{{$tableRawNameSourceMessage}_SEQ}}
-                    SQL,
-                )->execute();
+            if ($driverName === 'oci') {
+                // drop sequence for table `yii_source_message`.
+                $this->db
+                    ->createCommand()
+                    ->setSql(
+                        <<<SQL
+                        DROP SEQUENCE {{{$tableRawNameSourceMessage}_SEQ}}
+                        SQL,
+                    )
+                    ->execute();
             }
         }
     }
 
     /**
+     * Add sequence and trigger for tables '{{%yii_source_message}}' and '{{%yii_message}}' for Oracle.
+     *
      * @throws Exception
      * @throws Throwable
      */
     private function addSequenceAndTrigger(string $tableRawNameSourceMessage, string $tableRawNameMessage): void
     {
-        // create a sequence for table `source_message` and `message`.
-        $this->command->setSql(
-            <<<SQL
-            CREATE SEQUENCE {{{$tableRawNameSourceMessage}_SEQ}}
-            START WITH 1
-            INCREMENT BY 1
-            NOMAXVALUE
-            SQL,
-        )->execute();
+        // create a sequence for table `yii_source_message` and `yii_message`.
+        $this->db
+            ->createCommand()
+            ->setSql(
+                <<<SQL
+                CREATE SEQUENCE {{{$tableRawNameSourceMessage}_SEQ}}
+                START WITH 1
+                INCREMENT BY 1
+                NOMAXVALUE
+                SQL,
+            )
+            ->execute();
 
-        $this->command->setSql(
-            <<<SQL
-            CREATE SEQUENCE {{{$tableRawNameMessage}_SEQ}}
-            START WITH 1
-            INCREMENT BY 1
-            NOMAXVALUE
-            SQL,
-        )->execute();
+        $this->db
+            ->createCommand()
+            ->setSql(
+                <<<SQL
+                CREATE SEQUENCE {{{$tableRawNameMessage}_SEQ}}
+                START WITH 1
+                INCREMENT BY 1
+                NOMAXVALUE
+                SQL,
+            )
+            ->execute();
 
-        // create trigger for table `source_message` and `message`.
-        $this->command->setSql(
-            <<<SQL
-            CREATE TRIGGER {{{$tableRawNameSourceMessage}_TRG}} BEFORE INSERT ON {{{$tableRawNameSourceMessage}}} FOR EACH ROW BEGIN <<COLUMN_SEQUENCES>> BEGIN
-            IF INSERTING AND :NEW."id" IS NULL THEN SELECT {{{$tableRawNameSourceMessage}_SEQ}}.NEXTVAL INTO :NEW."id" FROM SYS.DUAL; END IF;
-            END COLUMN_SEQUENCES;
-            END;
-            SQL,
-        )->execute();
+        // create trigger for table `yii_source_message` and `yii_message`.
+        $this->db
+            ->createCommand()
+            ->setSql(
+                <<<SQL
+                CREATE TRIGGER {{{$tableRawNameSourceMessage}_TRG}} BEFORE INSERT ON {{{$tableRawNameSourceMessage}}} FOR EACH ROW BEGIN <<COLUMN_SEQUENCES>> BEGIN
+                IF INSERTING AND :NEW."id" IS NULL THEN SELECT {{{$tableRawNameSourceMessage}_SEQ}}.NEXTVAL INTO :NEW."id" FROM SYS.DUAL; END IF;
+                END COLUMN_SEQUENCES;
+                END;
+                SQL,
+            )
+            ->execute();
 
-        $this->command->setSql(
-            <<<SQL
-            CREATE TRIGGER {{{$tableRawNameMessage}_TRG}} BEFORE INSERT ON {{{$tableRawNameMessage}}} FOR EACH ROW BEGIN <<COLUMN_SEQUENCES>> BEGIN
-            IF INSERTING AND :NEW."id" IS NULL THEN SELECT {{{$tableRawNameMessage}_SEQ}}.NEXTVAL INTO :NEW."id" FROM SYS.DUAL; END IF;
-            END COLUMN_SEQUENCES;
-            END;
-            SQL,
-        )->execute();
+        $this->db
+            ->createCommand()
+            ->setSql(
+                <<<SQL
+                CREATE TRIGGER {{{$tableRawNameMessage}_TRG}} BEFORE INSERT ON {{{$tableRawNameMessage}}} FOR EACH ROW BEGIN <<COLUMN_SEQUENCES>> BEGIN
+                IF INSERTING AND :NEW."id" IS NULL THEN SELECT {{{$tableRawNameMessage}_SEQ}}.NEXTVAL INTO :NEW."id" FROM SYS.DUAL; END IF;
+                END COLUMN_SEQUENCES;
+                END;
+                SQL,
+            )
+            ->execute();
     }
 
     /**
+     * Create index for tables '{{%yii_source_message}}' and '{{%yii_message}}'.
+     *
      * @throws InvalidArgumentException
      * @throws Exception
      * @throws Throwable
@@ -160,15 +203,19 @@ final class DbSchemaManager
         string $tableMessage,
         string $tableRawNameMessage
     ): void {
-        $this->command
+        $this->db
+            ->createCommand()
             ->createIndex($tableSourceMessage, "IDX_{$tableRawNameSourceMessage}_category", 'category')
             ->execute();
-        $this->command
+        $this->db
+            ->createCommand()
             ->createIndex($tableMessage, "IDX_{$tableRawNameMessage}_locale", 'locale')
             ->execute();
     }
 
     /**
+     * Create schema for tables in the database.
+     *
      * @throws Exception
      * @throws InvalidArgumentException
      * @throws InvalidConfigException
@@ -176,6 +223,8 @@ final class DbSchemaManager
      * @throws Throwable
      */
     private function createSchema(
+        SchemaInterface $schema,
+        string $driverName,
         string $tableSourceMessage,
         string $tableRawNameSourceMessage,
         string $tableMessage,
@@ -183,52 +232,59 @@ final class DbSchemaManager
     ): void {
         $updateAction = 'RESTRICT';
 
-        if ($this->driverName === 'sqlsrv') {
-            // 'NO ACTION' is equal to 'RESTRICT' in MSSQL
+        if ($driverName === 'sqlsrv') {
+            // 'NO ACTION' is equal to 'RESTRICT' in `MSSQL`.
             $updateAction = 'NO ACTION';
         }
 
-        if ($this->driverName === 'oci') {
+        if ($driverName === 'oci') {
             // Oracle doesn't support action for update.
             $updateAction = null;
         }
 
-        // create table `source_message`.
-        $this->command->createTable(
-            $tableSourceMessage,
-            [
-                'id' => $this->schema->createColumn(SchemaInterface::TYPE_PK),
-                'category' => $this->schema->createColumn(SchemaInterface::TYPE_STRING),
-                'message_id' => $this->schema->createColumn(SchemaInterface::TYPE_TEXT),
-                'comment' => $this->schema->createColumn(SchemaInterface::TYPE_TEXT),
-            ],
-        )->execute();
+        // create table `yii_sorce_message`.
+        $this->db
+            ->createCommand()
+            ->createTable(
+                $tableSourceMessage,
+                [
+                    'id' => $schema->createColumn(SchemaInterface::TYPE_PK),
+                    'category' => $schema->createColumn(SchemaInterface::TYPE_STRING),
+                    'message_id' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                    'comment' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                ],
+            )
+            ->execute();
 
-        // create table `message`.
-        $this->command->createTable(
-            $tableMessage,
-            [
-                'id' => $this->schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
-                'locale' => $this->schema->createColumn(SchemaInterface::TYPE_STRING, 16)->notNull(),
-                'translation' => $this->schema->createColumn(SchemaInterface::TYPE_TEXT),
-            ],
-        )->execute();
+        // create table `yii_message`.
+        $this->db
+            ->createCommand()
+            ->createTable(
+                $tableMessage,
+                [
+                    'id' => $schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
+                    'locale' => $schema->createColumn(SchemaInterface::TYPE_STRING, 16)->notNull(),
+                    'translation' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                ],
+            )
+            ->execute();
 
-        // create primary key for table `source_message` and `message`.
-        $this->command
+        // create primary key for table `yii_message`.
+        $this->db
+            ->createCommand()
             ->addPrimaryKey($tableMessage, "PK_{$tableRawNameMessage}_id_locale", ['id', 'locale'])
             ->execute();
 
-        // create index for table `source_message` and `message`.
+        // create index for table `yii_source_message`.
         $this->createIndex($tableSourceMessage, $tableRawNameSourceMessage, $tableMessage, $tableRawNameMessage);
 
-        if ($this->driverName === 'oci') {
-            // create sequence and trigger for table `source_message` and `message`.
+        if ($driverName === 'oci') {
             $this->addSequenceAndTrigger($tableRawNameSourceMessage, $tableRawNameMessage);
         }
 
-        // add foreign key for table `message`.
-        $this->command
+        // Add foreign key for table `yii_message`.
+        $this->db
+            ->createCommand()
             ->addForeignKey(
                 $tableMessage,
                 "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}",
@@ -241,6 +297,8 @@ final class DbSchemaManager
     }
 
     /**
+     * Create schema for tables in SQLite database.
+     *
      * @throws Exception
      * @throws InvalidArgumentException
      * @throws InvalidConfigException
@@ -248,39 +306,52 @@ final class DbSchemaManager
      * @throws Throwable
      */
     private function createSchemaSqlite(
+        SchemaInterface $schema,
         string $tableSourceMessage,
         string $tableRawNameSourceMessage,
         string $tableMessage,
         string $tableRawNameMessage
     ): void {
-        // create table `source_message`.
-        $this->command->createTable(
-            $tableSourceMessage,
-            [
-                'id' => $this->schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
-                'category' => $this->schema->createColumn(SchemaInterface::TYPE_STRING),
-                'message_id' => $this->schema->createColumn(SchemaInterface::TYPE_TEXT),
-                'comment' => $this->schema->createColumn(SchemaInterface::TYPE_TEXT),
-                "CONSTRAINT [[PK_{$tableRawNameSourceMessage}]] PRIMARY KEY ([[id]])",
-            ],
-        )->execute();
+        // create table `yii_source_message`.
+        $this->db
+            ->createCommand()
+            ->createTable(
+                $tableSourceMessage,
+                [
+                    'id' => $schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
+                    'category' => $schema->createColumn(SchemaInterface::TYPE_STRING),
+                    'message_id' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                    'comment' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                    "CONSTRAINT [[PK_{$tableRawNameSourceMessage}]] PRIMARY KEY ([[id]])",
+                ],
+            )
+            ->execute();
 
-        // create table `message`.
-        $this->command->createTable(
-            $tableMessage,
-            [
-                'id' => $this->schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
-                'locale' => $this->schema->createColumn(SchemaInterface::TYPE_STRING, 16)->notNull(),
-                'translation' => $this->schema->createColumn(SchemaInterface::TYPE_TEXT),
-                'PRIMARY KEY (`id`, `locale`)',
-                "CONSTRAINT `FK_{$tableRawNameMessage}_{$tableRawNameSourceMessage}` FOREIGN KEY (`id`) REFERENCES `$tableRawNameSourceMessage` (`id`) ON DELETE CASCADE",
-            ],
-        )->execute();
+        // create table `yii_message`.
+        $this->db
+            ->createCommand()
+            ->createTable(
+                $tableMessage,
+                [
+                    'id' => $schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
+                    'locale' => $schema->createColumn(SchemaInterface::TYPE_STRING, 16)->notNull(),
+                    'translation' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                    'PRIMARY KEY (`id`, `locale`)',
+                    "CONSTRAINT `FK_{$tableRawNameMessage}_{$tableRawNameSourceMessage}` FOREIGN KEY (`id`) REFERENCES `$tableRawNameSourceMessage` (`id`) ON DELETE CASCADE",
+                ],
+            )
+            ->execute();
 
-        // create index for table `source_message` and `message`.
         $this->createIndex($tableSourceMessage, $tableRawNameSourceMessage, $tableMessage, $tableRawNameMessage);
     }
 
+    /**
+     * Checks if the given table exists in the database.
+     *
+     * @param string $table The name of the table to check.
+     *
+     * @return bool Whether the table exists or not.
+     */
     private function hasTable(string $table): bool
     {
         return $this->db->getTableSchema($table, true) !== null;
