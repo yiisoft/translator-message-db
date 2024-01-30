@@ -19,7 +19,7 @@ on:
       - 'infection.json.dist'
       - 'psalm.xml'
 
-name: pgsql
+name: mariadb
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,10 +27,10 @@ concurrency:
 
 jobs:
   tests:
-    name: PHP ${{ matrix.php }}-pgsql-${{ matrix.pgsql }}
+    name: PHP ${{ matrix.php }}-mariadb-${{ matrix.mariadb }}
 
     env:
-      extensions: pdo, pdo_pgsql
+      extensions: pdo, pdo_mysql
 
     runs-on: ${{ matrix.os }}
 
@@ -45,25 +45,25 @@ jobs:
           - 8.2
           - 8.3
 
-        pgsql:
-          - 9
-          - 10
-          - 11
-          - 12
-          - 13
-          - 14
-          - 15
+        mariadb:
+          - mariadb:10.4
+          - mariadb:10.5
+          - mariadb:10.6
+          - mariadb:10.7
+          - mariadb:10.8
+          - mariadb:10.9
+          - mariadb:latest
 
     services:
-      postgres:
-        image: postgres:${{ matrix.pgsql }}
+      mysql:
+        image: ${{ matrix.mariadb }}
         env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: root
-          POSTGRES_DB: yiitest
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+          MARIADB_ROOT_PASSWORD: ''
+          MARIADB_DATABASE: yiitest
         ports:
-          - 5432:5432
-        options: --name=postgres --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+          - 3306:3306
+        options: --health-cmd="mariadb-admin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout.
@@ -81,11 +81,11 @@ jobs:
       - name: Update composer.
         run: composer self-update
 
-      - name: Install db-pgsql.
-        run: composer require yiisoft/db-pgsql --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
+      - name: Install db-mysql.
+        run: composer require yiisoft/db-mysql --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
       - name: Run tests with phpunit.
-        run: vendor/bin/phpunit --testsuite=Pgsql --coverage-clover=coverage.xml --colors=always
+        run: vendor/bin/phpunit --testsuite=Mysql --coverage-clover=coverage.xml --colors=always
 
       - name: Upload coverage to Codecov.
         if: matrix.php == '8.1'
