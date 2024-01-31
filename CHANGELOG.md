@@ -2,7 +2,7 @@
 
 ## 1.0.1 under development
 
-- no changes in this release.
+- Enh #66: Add support of yiisoft/translator version ^3.0 (@thenotsoft)
 
 ## 1.0.0 May 09, 2023
 
