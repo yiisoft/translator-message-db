@@ -6,9 +6,6 @@
     <br>
 </p>
 
-The package provides message storage backend based on DB to be used 
-with [`yiisoft/translator`](https://github.com/yiisoft/translator) package.
-
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/translator-message-db/v/stable.png)](https://packagist.org/packages/yiisoft/translator-message-db)
 [![Total Downloads](https://poser.pugx.org/yiisoft/translator-message-db/downloads.png)](https://packagist.org/packages/yiisoft/translator-message-db)
 [![codecov](https://codecov.io/gh/yiisoft/translator-message-db/branch/master/graph/badge.svg?token=H8PFGG5SWO)](https://codecov.io/gh/yiisoft/translator-message-db)
@@ -16,15 +13,18 @@ with [`yiisoft/translator`](https://github.com/yiisoft/translator) package.
 [![static analysis](https://github.com/yiisoft/translator-message-db/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/translator-message-db/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/translator-message-db/coverage.svg)](https://shepherd.dev/github/yiisoft/translator-message-db)
 
+The package provides message storage backend based on DB to be used 
+with [`yiisoft/translator`](https://github.com/yiisoft/translator) package.
+
 ## Supported databases
 
-|                      Packages                       |      PHP      |    Versions     |                                                                        CI-Actions                                                                         |
-|:---------------------------------------------------:|:-------------:|:---------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|  [[db-mssql]](https://github.com/yiisoft/db-mssql)  | **8.0 - 8.2** | **2017 - 2022** |  [![mssql](https://github.com/yiisoft/translator-message-db/actions/workflows/mssql.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/mssql.yml)   | |
-|  [[db-mysql/mariadb]](https://github.com/yiisoft/db-mysql)  | **8.0 - 8.2** |  **5.7-8.0**/**10.4-10.10**  |  [![mysql](https://github.com/yiisoft/translator-message-db/actions/workflows/mysql.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/mysql.yml)   |
+| Packages | PHP | Versions | CI-Actions |
+|----------|-----|----------|------------|
+|  [[db-mssql]](https://github.com/yiisoft/db-mssql) | **8.0 - 8.2** | **2017 - 2022** | [![mssql](https://github.com/yiisoft/translator-message-db/actions/workflows/mssql.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/mssql.yml) | |
+|  [[db-mysql/mariadb]](https://github.com/yiisoft/db-mysql) | **8.0 - 8.2** |  **5.7-8.0**/**10.4-10.10**  | [![mysql](https://github.com/yiisoft/translator-message-db/actions/workflows/mysql.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/mysql.yml) |
 | [[db-oracle]](https://github.com/yiisoft/db-oracle) | **8.0 - 8.2** |  **11C - 21C**  | [![oracle](https://github.com/yiisoft/translator-message-db/actions/workflows/oracle.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/oracle.yml) |
-|  [[db-pgsql]](https://github.com/yiisoft/db-pgsql)  | **8.0 - 8.2** | **9.0 - 15.0**  |  [![pgsql](https://github.com/yiisoft/translator-message-db/actions/workflows/pgsql.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/pgsql.yml)   |
-| [[db-sqlite]](https://github.com/yiisoft/db-sqlite) | **8.0 - 8.2** |  **3:latest**   | [![sqlite](https://github.com/yiisoft/translator-message-db/actions/workflows/sqlite.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/sqlite.yml) |
+|  [[db-pgsql]](https://github.com/yiisoft/db-pgsql) | **8.0 - 8.2** | **9.0 - 15.0**  |  [![pgsql](https://github.com/yiisoft/translator-message-db/actions/workflows/pgsql.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/pgsql.yml)   |
+| [[db-sqlite]](https://github.com/yiisoft/db-sqlite) | **8.0 - 8.2** |  **3:latest** | [![sqlite](https://github.com/yiisoft/translator-message-db/actions/workflows/sqlite.yml/badge.svg)](https://github.com/yiisoft/translator-message-db/actions/workflows/sqlite.yml) |
 
 ## Requirements
 
@@ -33,10 +33,10 @@ with [`yiisoft/translator`](https://github.com/yiisoft/translator) package.
 
 ## Installation
 
-The package could be installed with composer:
+The package could be installed with [Composer](https://getcomposer.org):
 
 ```shell
-composer require yiisoft/translator-message-db --prefer-dist
+composer require yiisoft/translator-message-db
 ```
 
 ## Create database connection
@@ -75,10 +75,6 @@ In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will g
 If not, the following DI container configuration is necessary:
 
 ```php
-<?php
-
-declare(strict_types=1);
-
 use Yiisoft\Translator\MessageReaderInterface;
 use Yiisoft\Translator\Message\Db\MessageSource;
 
@@ -145,14 +141,19 @@ $data = [
 $messageSource->write($category, $language, $data);
 ```
 
-## Support
+## Documentation
 
-If you need help or have a question, the [Yii Forum](https://forum.yiiframework.com/c/yii-3-0/db/68) is a good place for that.
+- [Internals](docs/internals.md)
+
+If you need help or have a question, the [Yii Forum](https://forum.yiiframework.com/c/yii-3-0/63) is a good place for that.
 You may also check out other [Yii Community Resources](https://www.yiiframework.com/community).
 
-## Testing
+## License
 
-[Check the testing instructions](/docs/en/testing.md) to learn about testing.
+The Yii Translator DB Message Storage is free software. It is released under the terms of the BSD License.
+Please see [`LICENSE`](./LICENSE.md) for more information.
+
+Maintained by [Yii Software](https://www.yiiframework.com/).
 
 ## Support the project
 
@@ -165,10 +166,3 @@ You may also check out other [Yii Community Resources](https://www.yiiframework.
 [![Telegram](https://img.shields.io/badge/telegram-join-1DA1F2?style=flat&logo=telegram)](https://t.me/yii3en)
 [![Facebook](https://img.shields.io/badge/facebook-join-1DA1F2?style=flat&logo=facebook&logoColor=ffffff)](https://www.facebook.com/groups/yiitalk)
 [![Slack](https://img.shields.io/badge/slack-join-1DA1F2?style=flat&logo=slack)](https://yiiframework.com/go/slack)
-
-## License
-
-The Yii Translator DB Message Storage is free software. It is released under the terms of the BSD License.
-Please see [`LICENSE`](./LICENSE.md) for more information.
-
-Maintained by [Yii Software](https://www.yiiframework.com/).
