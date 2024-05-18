@@ -30,6 +30,10 @@ For running the Docker containers you can use the following command:
 docker compose up -d
 ```
 
+## Unit testing	
+
+The package is tested with [PHPUnit](https://phpunit.de/).
+
 ### Global testing
 
 The following steps are required to run the tests.
@@ -78,7 +82,7 @@ The code is statically analyzed with [Psalm](https://psalm.dev/). To run static 
 ./vendor/bin/psalm
 ```
 
-## Rector
+## Code style
 
 Use [Rector](https://github.com/rectorphp/rector) to make codebase follow some specific rules or
 use either newest or any specific version of PHP:
@@ -87,11 +91,10 @@ use either newest or any specific version of PHP:
 ./vendor/bin/rector
 ```
 
-## Composer require checker
+## Dependencies
 
-This package uses [composer-require-checker](https://github.com/maglnet/ComposerRequireChecker) to check if all dependencies are correctly defined in `composer.json`.
-
-To run the checker, execute the following command:
+This package uses [composer-require-checker](https://github.com/maglnet/ComposerRequireChecker) to check if
+all dependencies are correctly defined in `composer.json`. To run the checker, execute the following command:
 
 ```shell
 ./vendor/bin/composer-require-checker
