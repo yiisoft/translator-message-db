@@ -30,7 +30,7 @@ For running the Docker containers you can use the following command:
 docker compose up -d
 ```
 
-## Unit testing	
+## Unit testing
 
 The package is tested with [PHPUnit](https://phpunit.de/).
 
