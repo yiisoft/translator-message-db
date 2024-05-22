@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px">
+        <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px" alt="Yii">
     </a>
     <h1 align="center">Yii Translator DB Message Storage</h1>
     <br>
@@ -13,7 +13,7 @@
 [![static analysis](https://github.com/yiisoft/translator-message-db/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/translator-message-db/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/translator-message-db/coverage.svg)](https://shepherd.dev/github/yiisoft/translator-message-db)
 
-The package provides message storage backend based on DB to be used 
+The package provides message storage backend based on DB to be used
 with [`yiisoft/translator`](https://github.com/yiisoft/translator) package.
 
 ## Supported databases
@@ -41,7 +41,7 @@ composer require yiisoft/translator-message-db
 
 ## Create database connection
 
-For more information see [yiisoft/db](https://github.com/yiisoft/db/tree/master/docs/en#create-connection).
+For more information see [yiisoft/db](https://github.com/yiisoft/db/tree/master/docs/guide/en#create-connection).
 
 ## Database Preparing
 
@@ -55,7 +55,7 @@ Package provides two way for preparing database:
         - [Oracle](/sql/oci-up.sql),
         - [PostgreSQL](/sql/pgsql-up.sql)
         - [SQLite](/sql/sqlite-up.sql)
-    
+
     - Ensure no tables:
         - [MSSQL](/sql/sqlsrv-down.sql),
         - [MySQL / MariaDB](/sql/mysql-down.sql),
@@ -69,7 +69,6 @@ Package provides two way for preparing database:
 ## Configuration
 
 ### Quick start
-
 
 In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically.
 If not, the following DI container configuration is necessary:
