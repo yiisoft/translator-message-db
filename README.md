@@ -70,7 +70,7 @@ Package provides two way for preparing database:
 
 ### Quick start
 
-In case you use [`yiisoft/config`](http://github.com/yiisoft/config), you will get configuration automatically.
+In case you use [`yiisoft/config`](https://github.com/yiisoft/config), you will get configuration automatically.
 If not, the following DI container configuration is necessary:
 
 ```php
