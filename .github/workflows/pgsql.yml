@@ -38,20 +38,33 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-
         php:
           - 8.1
           - 8.2
           - 8.3
-
+          - 8.4
+          - 8.5
         pgsql:
-          - 9
-          - 10
-          - 11
-          - 12
-          - 13
-          - 14
-          - 15
+          - 18
+        include:
+          - php: 8.5
+            pgsql: 9
+          - php: 8.5
+            pgsql: 10
+          - php: 8.5
+            pgsql: 11
+          - php: 8.5
+            pgsql: 12
+          - php: 8.5
+            pgsql: 13
+          - php: 8.5
+            pgsql: 14
+          - php: 8.5
+            pgsql: 15
+          - php: 8.5
+            pgsql: 16
+          - php: 8.5
+            pgsql: 17
 
     services:
       postgres:
