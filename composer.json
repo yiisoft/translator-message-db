@@ -67,7 +67,7 @@
         }
     },
     "scripts": {
-        "cs-fix": "php-cs-fixer fix",
+        "psalm": "psalm",
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"
     }
