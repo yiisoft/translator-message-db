@@ -29,7 +29,7 @@
         }
     ],
     "require": {
-        "php": "^8.0",
+        "php": "^8.1",
         "ext-json": "*",
         "yiisoft/cache": "^2.0|^3.0",
         "yiisoft/arrays": "^2.0|^3.0",
@@ -37,12 +37,11 @@
         "yiisoft/translator": "^2.2|^3.0"
     },
     "require-dev": {
-        "maglnet/composer-require-checker": "^4.2",
-        "phpunit/phpunit": "^9.6|^10.5",
-        "rector/rector": "^2.0",
-        "roave/infection-static-analysis-plugin": "^1.25|^1.34",
-        "spatie/phpunit-watcher": "^1.23",
-        "vimeo/psalm": "^4.8|^5.20"
+        "bamarni/composer-bin-plugin": "^1.8.3",
+        "phpunit/phpunit": "^10.5.60",
+        "rector/rector": "^2.3.1",
+        "roave/infection-static-analysis-plugin": "^1.35",
+        "vimeo/psalm": "^5.26.1 || ^6"
     },
     "autoload": {
         "psr-4": {
@@ -55,6 +54,11 @@
         }
     },
     "extra": {
+        "bamarni-bin": {
+            "bin-links": true,
+            "forward-command": true,
+            "target-directory": "tools"
+        },
         "config-plugin-options": {
             "source-directory": "config"
         }
@@ -62,12 +66,13 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
+            "bamarni/composer-bin-plugin": true,
             "infection/extension-installer": true,
             "composer/package-versions-deprecated": true
         }
     },
     "scripts": {
-        "test": "phpunit --testdox --no-interaction",
-        "test-watch": "phpunit-watcher watch"
+        "psalm": "psalm",
+        "test": "phpunit --testdox --no-interaction"
     }
 }
