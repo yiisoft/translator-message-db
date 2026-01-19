@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Yiisoft\Translator\Message\Db;
 
 use JsonException;
+use Psr\SimpleCache\CacheInterface;
 use RuntimeException;
 use Throwable;
 use Yiisoft\Arrays\ArrayHelper;
-use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidArgumentException;
@@ -118,7 +118,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                 /** @psalm-var array<string,string>|false $result */
                 $result = $this->db
                     ->createCommand()
-                    ->insertWithReturningPks(
+                    ->insertReturningPks(
                         $this->sourceMessageTable,
                         [
                             'category' => $category,
@@ -146,7 +146,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             if ($needUpdate || !isset($translatedMessages[$messageId])) {
                 $result = $this->db
                     ->createCommand()
-                    ->insertWithReturningPks(
+                    ->insertReturningPks(
                         $this->messageTable,
                         [
                             'id' => $sourceMessages[$messageId],
@@ -199,10 +199,11 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             ->innerJoin(
                 ['td' => $this->messageTable],
                 [
-                    'td.id' => new Expression('[[ts.id]]'),
-                    'ts.category' => $category,
+                    'td.id' => new Expression('[[ts]].[[id]]'),
+                    'ts.category' => new Expression(':messageCategory'),
                 ]
             )
+            ->params([':messageCategory' => $category])
             ->where(['locale' => $locale]);
 
         /** @psalm-var array<int, array<string, string>> $messages */
