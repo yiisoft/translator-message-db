@@ -66,8 +66,8 @@ jobs:
         env:
           MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
           MARIADB_DATABASE: translator-message-db-test
-          MYSQL_USER: yii
-          MYSQL_PASSWORD: 'q1w2e3r4'
+          MARIADB_USER: yii
+          MARIADB_PASSWORD: 'q1w2e3r4'
         ports:
           - 3306:3306
         options: --health-cmd="mariadb-admin ping" --health-interval=10s --health-timeout=5s --health-retries=3
