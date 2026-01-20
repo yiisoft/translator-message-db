@@ -34,12 +34,10 @@ jobs:
     env:
       extensions: pdo, pdo_oci, oci8
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
         php:
           - 8.1
           - 8.2
@@ -49,8 +47,8 @@ jobs:
         oracle:
           - 21
         include:
-            - php: 8.5
-              oracle: 18
+          - php: 8.5
+            oracle: 18
 
     services:
       oci:
