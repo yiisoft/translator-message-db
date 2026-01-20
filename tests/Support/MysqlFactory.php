@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Yiisoft\Translator\Message\Db\Tests\Support;
 
 use Yiisoft\Db\Connection\ConnectionInterface;
-use Yiisoft\Db\Mysql\Dsn;
 use Yiisoft\Db\Mysql\Connection;
 use Yiisoft\Db\Mysql\Driver;
 

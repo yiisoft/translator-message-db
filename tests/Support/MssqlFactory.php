@@ -7,7 +7,6 @@ namespace Yiisoft\Translator\Message\Db\Tests\Support;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Mssql\Connection;
 use Yiisoft\Db\Mssql\Driver;
-use Yiisoft\Db\Mssql\Dsn;
 
 final class MssqlFactory extends ConnectionFactory
 {

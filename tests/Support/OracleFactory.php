@@ -8,7 +8,6 @@ use PDO;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Oracle\Connection;
 use Yiisoft\Db\Oracle\Driver;
-use Yiisoft\Db\Oracle\Dsn;
 
 final class OracleFactory extends ConnectionFactory
 {

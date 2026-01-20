@@ -7,7 +7,6 @@ namespace Yiisoft\Translator\Message\Db\Tests\Support;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Pgsql\Connection;
 use Yiisoft\Db\Pgsql\Driver;
-use Yiisoft\Db\Pgsql\Dsn;
 
 final class PgsqlFactory extends ConnectionFactory
 {
