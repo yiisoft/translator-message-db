@@ -7,21 +7,20 @@ namespace Yiisoft\Translator\Message\Db\Tests\Common;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Constant\ColumnType;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Schema\SchemaInterface;
 
 /**
  * @group Mssql
- *
- * @psalm-suppress PropertyNotSetInConstructor
  */
 abstract class AbstractSQLDumpFileTest extends TestCase
 {
     protected ConnectionInterface $db;
-    protected string $commentType = SchemaInterface::TYPE_TEXT;
-    protected string $messageIdType = SchemaInterface::TYPE_TEXT;
-    protected string $translationType = SchemaInterface::TYPE_TEXT;
+    protected string $commentType = ColumnType::TEXT;
+    protected string $messageIdType = ColumnType::TEXT;
+    protected string $translationType = ColumnType::TEXT;
     private string $driverName = '';
     private string $tableSourceMessage = '{{%yii_source_message}}';
     private string $tableMessage = '{{%yii_message}}';

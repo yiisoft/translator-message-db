@@ -7,6 +7,7 @@ namespace Yiisoft\Translator\Message\Db\Tests\Common;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Constant\ColumnType;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Schema\SchemaInterface;
@@ -14,9 +15,9 @@ use Yiisoft\Translator\Message\Db\DbSchemaManager;
 
 abstract class AbstractDbSchemaManagerTest extends TestCase
 {
-    protected string $commentType = SchemaInterface::TYPE_TEXT;
-    protected string $messageIdType = SchemaInterface::TYPE_TEXT;
-    protected string $translationType = SchemaInterface::TYPE_TEXT;
+    protected string $commentType = ColumnType::TEXT;
+    protected string $messageIdType = ColumnType::TEXT;
+    protected string $translationType = ColumnType::TEXT;
     protected ConnectionInterface $db;
     private DbSchemaManager $dbSchemaManager;
 

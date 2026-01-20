@@ -84,11 +84,6 @@ abstract class AbstractMessageSourceTest extends TestCase
      * @dataProvider generateFailTranslationsData
      *
      * @psalm-param array<string, array<string, string>> $data
-     *
-     * @throws Exception
-     * @throws InvalidCallException
-     * @throws InvalidConfigException
-     * @throws Throwable
      */
     public function testWriteWithFailData(string $category, string $locale, array $data): void
     {
@@ -98,14 +93,6 @@ abstract class AbstractMessageSourceTest extends TestCase
         $messageSource->write($category, $locale, $data);
     }
 
-    /**
-     * @throws Exception
-     * @throws JsonException
-     * @throws InvalidArgumentException
-     * @throws InvalidCallException
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     public function testMultiWrite(): void
     {
         $allData = self::generateTranslationsData();
@@ -129,14 +116,6 @@ abstract class AbstractMessageSourceTest extends TestCase
         }
     }
 
-    /**
-     * @throws Exception
-     * @throws JsonException
-     * @throws InvalidArgumentException
-     * @throws InvalidCallException
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     public function testUpdate(): void
     {
         $updatedData = [

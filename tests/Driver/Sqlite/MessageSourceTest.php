@@ -12,16 +12,9 @@ use Yiisoft\Translator\Message\Db\Tests\Support\SqliteFactory;
 
 /**
  * @group sqlite
- *
- * @psalm-suppress PropertyNotSetInConstructor
  */
 final class MessageSourceTest extends AbstractMessageSourceTest
 {
-    /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     protected function setUp(): void
     {
         // create connection dbms-specific
