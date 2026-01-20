@@ -5,19 +5,11 @@ declare(strict_types=1);
 namespace Yiisoft\Translator\Message\Db\Tests\Common;
 
 use InvalidArgumentException;
-use JsonException;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
-use Throwable;
 use Yiisoft\Cache\ArrayCache;
 use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\CacheInterface;
-use Yiisoft\Db\Command\CommandInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
-use Yiisoft\Db\Exception\Exception;
-use Yiisoft\Db\Exception\InvalidCallException;
-use Yiisoft\Db\Exception\InvalidConfigException;
-use Yiisoft\Db\QueryBuilder\QueryBuilderInterface;
 use Yiisoft\Translator\Message\Db\DbSchemaManager;
 use Yiisoft\Translator\Message\Db\MessageSource;
 

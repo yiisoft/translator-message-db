@@ -335,7 +335,7 @@ final class DbSchemaManager
                 $tableMessage,
                 [
                     'id' => $columnBuilder::integer()->notNull(),
-                    'locale' =>$columnBuilder::string(16)->notNull(),
+                    'locale' => $columnBuilder::string(16)->notNull(),
                     'translation' => $columnBuilder::text(),
                     'PRIMARY KEY (`id`, `locale`)',
                     "CONSTRAINT `FK_{$tableRawNameMessage}_{$tableRawNameSourceMessage}` FOREIGN KEY (`id`) REFERENCES `$tableRawNameSourceMessage` (`id`) ON DELETE CASCADE",
