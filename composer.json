@@ -42,6 +42,11 @@
         "rector/rector": "^2.3.1",
         "roave/infection-static-analysis-plugin": "^1.35",
         "vimeo/psalm": "^5.26.1 || ^6.14.3",
+        "vlucas/phpdotenv": "^5.6.2",
+        "yiisoft/db-mssql": "^2.0",
+        "yiisoft/db-mysql": "^2.0",
+        "yiisoft/db-oracle": "^2.0",
+        "yiisoft/db-pgsql": "^2.0",
         "yiisoft/db-sqlite": "^2.0"
     },
     "autoload": {

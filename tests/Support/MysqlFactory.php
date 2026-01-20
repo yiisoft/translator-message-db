@@ -13,11 +13,14 @@ final class MysqlFactory extends ConnectionFactory
 {
     public function createConnection(): ConnectionInterface
     {
-        $pdoDriver = new Driver(
-            new Dsn('mysql', '127.0.0.1', 'yiitest', '3306', ['charset' => 'utf8mb4']),
-            'root',
-            '',
-        );
+        $database = getenv('YII_MYSQL_DATABASE');
+        $host = getenv('YII_MYSQL_HOST');
+        $port = getenv('YII_MYSQL_PORT');
+        $user = getenv('YII_MYSQL_USER');
+        $password = getenv('YII_MYSQL_PASSWORD');
+
+        $pdoDriver = new Driver("mysql:host=$host;dbname=$database;port=$port", $user, $password);
+        $pdoDriver->charset('UTF8MB4');
 
         return new Connection($pdoDriver, $this->createSchemaCache());
     }

@@ -78,22 +78,31 @@ abstract class AbstractSQLDumpFileTest extends TestCase
         $this->assertSame($this->translationType, $tableSchema?->getColumn('translation')->getType());
 
         $foreignKey = new ForeignKey(
-            '0',
+            match ($driverName) {
+                'sqlsrv', 'oci', 'mysql', 'pgsql' => 'FK_yii_source_message_yii_message',
+                default => '0',
+            },
             ['id'],
             match ($driverName) {
-                'mssql' => 'dbo',
+                'sqlsrv' => 'dbo',
+                'pgsql' => 'public',
+                'oci' => 'YII',
                 default => '',
             },
             'yii_source_message',
             ['id'],
             'CASCADE',
-            'NO ACTION',
+            match ($driverName) {
+                'mysql', 'pgsql' => 'RESTRICT',
+                'oci' => null,
+                default => 'NO ACTION',
+            },
         );
         $foreignKeysExpected = [
             'FK_yii_source_message_yii_message' => $foreignKey,
         ];
 
-        if ($this->driverName === 'oci' || $this->driverName === 'sqlite') {
+        if ($this->driverName === 'sqlite') {
             $foreignKeysExpected = [
                 0 => $foreignKey,
             ];

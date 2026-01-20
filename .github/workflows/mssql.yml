@@ -83,7 +83,7 @@ jobs:
           sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
 
       - name: Create MS SQL Database.
-        run: docker exec -i mssql /opt/mssql-tools${{ matrix.mssql.odbc-version }}/bin/sqlcmd ${{ matrix.mssql.flag }} -S localhost -U SA -P 'YourStrong!Passw0rd' -Q 'CREATE DATABASE yiitest'
+        run: docker exec -i mssql /opt/mssql-tools${{ matrix.mssql.odbc-version }}/bin/sqlcmd ${{ matrix.mssql.flag }} -S localhost -U SA -P 'YourStrong!Passw0rd' -Q 'CREATE DATABASE translator-message-db-test'
 
       - name: Install PHP with extensions.
         uses: shivammathur/setup-php@v2
@@ -97,11 +97,15 @@ jobs:
       - name: Update composer.
         run: composer self-update
 
-      - name: Install db-mssql.
-        run: composer require yiisoft/db-mssql --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
-
       - name: Run tests with phpunit.
         run: vendor/bin/phpunit --testsuite=Mssql --coverage-clover=coverage.xml --colors=always
+        env:
+          ENVIRONMENT: ci
+          YII_MSSQL_DATABASE: translator-message-db-test
+          YII_MSSQL_HOST: 127.0.0.1
+          YII_MSSQL_PORT: 1433
+          YII_MSSQL_USER: SA
+          YII_MSSQL_PASSWORD: YourStrong!Passw0rd
 
       - name: Upload coverage to Codecov.
         if: matrix.php == '8.3'

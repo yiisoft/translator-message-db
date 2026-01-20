@@ -14,6 +14,7 @@ use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidCallException;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Expression\Value\ColumnName;
+use Yiisoft\Db\Expression\Value\Value;
 use Yiisoft\Db\Query\Query;
 use Yiisoft\Translator\MessageReaderInterface;
 use Yiisoft\Translator\MessageWriterInterface;
@@ -190,7 +191,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                 ['td' => $this->messageTable],
                 [
                     'td.id' => new ColumnName('ts.id'),
-                    'ts.category' => $category,
+                    'ts.category' => new Value($category),
                 ]
             )
             ->where(['locale' => $locale]);

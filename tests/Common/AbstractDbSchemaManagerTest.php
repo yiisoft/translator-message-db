@@ -109,22 +109,31 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
         $this->assertSame($this->translationType, $tableSchema?->getColumn('translation')->getType());
 
         $foreignKey = new ForeignKey(
-            '0',
+            match ($driverName) {
+                'sqlsrv', 'oci', 'mysql', 'pgsql' => "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}",
+                default => '0',
+            },
             ['id'],
             match ($driverName) {
-                'mssql' => 'dbo',
+                'sqlsrv' => 'dbo',
+                'pgsql' => 'public',
+                'oci' => 'YII',
                 default => '',
             },
             $tableRawNameSourceMessage,
             ['id'],
             'CASCADE',
-            'NO ACTION',
+            match ($driverName) {
+                'mysql', 'pgsql' => 'RESTRICT',
+                'oci' => null,
+                default => 'NO ACTION',
+            },
         );
         $foreignKeysExpected = [
             "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}" => $foreignKey,
         ];
 
-        if ($driverName === 'oci' || $driverName === 'sqlite') {
+        if ($driverName === 'sqlite') {
             $foreignKeysExpected = [
                 0 => $foreignKey,
             ];
