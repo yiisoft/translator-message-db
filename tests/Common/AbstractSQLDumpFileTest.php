@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Constant\ColumnType;
+use Yiisoft\Db\Constraint\ForeignKey;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Schema\SchemaInterface;
@@ -39,11 +40,6 @@ abstract class AbstractSQLDumpFileTest extends TestCase
         unset($this->db, $this->driverName);
     }
 
-    /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     public function testEnsureTableAndEnsureNoTable(): void
     {
         $this->loadFromSQLDumpFile(dirname(__DIR__, 2) . "/sql/$this->driverName-up.sql");
@@ -57,11 +53,6 @@ abstract class AbstractSQLDumpFileTest extends TestCase
         $this->assertNull($this->db->getTableSchema($this->tableMessage, true));
     }
 
-    /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     public function testVerifyTableStructure(): void
     {
         $this->loadFromSQLDumpFile(dirname(__DIR__, 2) . "/sql/$this->driverName-up.sql");
@@ -71,8 +62,8 @@ abstract class AbstractSQLDumpFileTest extends TestCase
         $this->assertSame('yii_source_message', $tableSchema?->getName());
         $this->assertSame(['id'], $tableSchema?->getPrimaryKey());
         $this->assertSame(['id', 'category', 'message_id', 'comment'], $tableSchema?->getColumnNames());
-        $this->assertSame(SchemaInterface::TYPE_INTEGER, $tableSchema?->getColumn('id')->getType());
-        $this->assertSame(SchemaInterface::TYPE_STRING, $tableSchema?->getColumn('category')->getType());
+        $this->assertSame(ColumnType::INTEGER, $tableSchema?->getColumn('id')->getType());
+        $this->assertSame(ColumnType::STRING, $tableSchema?->getColumn('category')->getType());
         $this->assertSame($this->messageIdType, $tableSchema?->getColumn('message_id')->getType());
         $this->assertSame($this->commentType, $tableSchema?->getColumn('comment')->getType());
 
@@ -81,28 +72,31 @@ abstract class AbstractSQLDumpFileTest extends TestCase
         $this->assertSame('yii_message', $tableSchema?->getName());
         $this->assertSame(['id', 'locale'], $tableSchema?->getPrimaryKey());
         $this->assertSame(['id', 'locale', 'translation'], $tableSchema?->getColumnNames());
-        $this->assertSame(SchemaInterface::TYPE_INTEGER, $tableSchema?->getColumn('id')->getType());
-        $this->assertSame(SchemaInterface::TYPE_STRING, $tableSchema?->getColumn('locale')->getType());
+        $this->assertSame(ColumnType::INTEGER, $tableSchema?->getColumn('id')->getType());
+        $this->assertSame(ColumnType::STRING, $tableSchema?->getColumn('locale')->getType());
         $this->assertSame(16, $tableSchema?->getColumn('locale')->getSize());
         $this->assertSame($this->translationType, $tableSchema?->getColumn('translation')->getType());
 
+        $foreignKey = new ForeignKey(
+            '0',
+            ['id'],
+            '',
+            'yii_source_message',
+            ['id'],
+            'CASCADE',
+            'NO ACTION',
+        );
         $foreignKeysExpected = [
-            'FK_yii_source_message_yii_message' => [
-                0 => 'yii_source_message',
-                'id' => 'id',
-            ],
+            'FK_yii_source_message_yii_message' => $foreignKey,
         ];
 
         if ($this->driverName === 'oci' || $this->driverName === 'sqlite') {
             $foreignKeysExpected = [
-                0 => [
-                    0 => 'yii_source_message',
-                    'id' => 'id',
-                ],
+                0 => $foreignKey,
             ];
         }
 
-        $this->assertSame($foreignKeysExpected, $tableSchema?->getForeignKeys());
+        $this->assertEquals($foreignKeysExpected, $tableSchema?->getForeignKeys());
 
         $this->loadFromSQLDumpFile(dirname(__DIR__, 2) . "/sql/$this->driverName-down.sql");
 

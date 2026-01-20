@@ -14,6 +14,7 @@ use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidCallException;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Expression\Expression;
+use Yiisoft\Db\Expression\Value\ColumnName;
 use Yiisoft\Db\Query\Query;
 use Yiisoft\Translator\MessageReaderInterface;
 use Yiisoft\Translator\MessageWriterInterface;
@@ -189,7 +190,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             ->innerJoin(
                 ['td' => $this->messageTable],
                 [
-                    'td.id' => new Expression('[[ts.id]]'),
+                    'td.id' => new ColumnName('ts.id'),
                     'ts.category' => $category,
                 ]
             )

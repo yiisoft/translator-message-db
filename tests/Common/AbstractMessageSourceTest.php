@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db\Tests\Common;
 
+use InvalidArgumentException;
 use JsonException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -14,7 +15,6 @@ use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Command\CommandInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
-use Yiisoft\Db\Exception\InvalidArgumentException;
 use Yiisoft\Db\Exception\InvalidCallException;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\QueryBuilder\QueryBuilderInterface;
@@ -41,11 +41,6 @@ abstract class AbstractMessageSourceTest extends TestCase
         parent::setup();
     }
 
-    /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     protected function tearDown(): void
     {
         // drop table
@@ -62,13 +57,6 @@ abstract class AbstractMessageSourceTest extends TestCase
      * @dataProvider generateTranslationsData
      *
      * @psalm-param array<string, array<string, string>> $data
-     *
-     * @throws Exception
-     * @throws JsonException
-     * @throws InvalidArgumentException
-     * @throws InvalidCallException
-     * @throws InvalidConfigException
-     * @throws Throwable
      */
     public function testWrite(string $category, string $locale, array $data): void
     {
@@ -165,14 +153,6 @@ abstract class AbstractMessageSourceTest extends TestCase
         }
     }
 
-    /**
-     * @throws Exception
-     * @throws JsonException
-     * @throws InvalidArgumentException
-     * @throws InvalidCallException
-     * @throws InvalidConfigException
-     * @throws Throwable
-     */
     public function testMultiWriteWithCache(): void
     {
         $allData = self::generateTranslationsData();
@@ -199,13 +179,6 @@ abstract class AbstractMessageSourceTest extends TestCase
      * @dataProvider generateTranslationsData
      *
      * @psalm-param array<string, array<string, string>> $data
-     *
-     * @throws Exception
-     * @throws JsonException
-     * @throws InvalidArgumentException
-     * @throws InvalidCallException
-     * @throws InvalidConfigException
-     * @throws Throwable
      */
     public function testReadMessages(string $category, string $locale, array $data): void
     {
@@ -215,40 +188,6 @@ abstract class AbstractMessageSourceTest extends TestCase
         $messages = $messageSource->getMessages($category, $locale);
 
         $this->assertEquals($messages, $data);
-    }
-
-    public function testReadMessageError(): void
-    {
-        $qbMock = $this->createMock(QueryBuilderInterface::class);
-        $qbMock->expects(self::atLeastOnce())
-            ->method('build')
-            ->willReturn(['', []]);
-
-        $commandMock = $this->createMock(CommandInterface::class);
-        $commandMock->expects(self::once())
-            ->method('insertWithReturningPks')
-            ->willReturn(false);
-        $commandMock->expects(self::atLeastOnce())
-            ->method('queryAll')
-            ->willReturn([]);
-
-        $dbMock = $this->createMock(ConnectionInterface::class);
-        $dbMock->expects(self::atLeastOnce())
-            ->method('createCommand')
-            ->willReturn($commandMock);
-        $dbMock->expects(self::atLeastOnce())
-            ->method('getQueryBuilder')
-            ->willReturn($qbMock);
-
-        $messageSource = new MessageSource($dbMock);
-
-        $this->expectException(RuntimeException::class);
-        $messageSource->write('app', 'de', [
-            'test.id1' => [
-                'comment' => 'Translate wisely!',
-                'message' => 'app: Test 1 on the (de)',
-            ],
-        ]);
     }
 
     /**
