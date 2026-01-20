@@ -70,7 +70,7 @@ jobs:
       postgres:
         image: postgres:${{ matrix.pgsql }}
         env:
-          POSTGRES_DB: data-db-test
+          POSTGRES_DB: translator-message-db-test
           POSTGRES_USER: yii
           POSTGRES_PASSWORD: q1w2e3r4
         ports:
