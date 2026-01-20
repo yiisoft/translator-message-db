@@ -57,6 +57,7 @@ abstract class AbstractSQLDumpFileTest extends TestCase
         $this->loadFromSQLDumpFile(dirname(__DIR__, 2) . "/sql/$this->driverName-up.sql");
 
         $tableSchema = $this->db->getTableSchema($this->tableSourceMessage);
+        $driverName = $this->db->getDriverName();
 
         $this->assertSame('yii_source_message', $tableSchema?->getName());
         $this->assertSame(['id'], $tableSchema?->getPrimaryKey());
@@ -79,7 +80,10 @@ abstract class AbstractSQLDumpFileTest extends TestCase
         $foreignKey = new ForeignKey(
             '0',
             ['id'],
-            '',
+            match ($driverName) {
+                'mssql' => 'dbo',
+                default => '',
+            },
             'yii_source_message',
             ['id'],
             'CASCADE',

@@ -84,7 +84,6 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
         $this->dbSchemaManager->ensureTables($tableSourceMessage, $tableMessage);
 
         $driverName = $this->db->getDriverName();
-        $schema = $this->db->getSchema();
         $quoter = $this->db->getQuoter();
         $tableRawNameSourceMessage = $quoter->getRawTableName($tableSourceMessage);
         $tableRawNameMessage = $quoter->getRawTableName($tableMessage);
@@ -112,7 +111,10 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
         $foreignKey = new ForeignKey(
             '0',
             ['id'],
-            '',
+            match ($driverName) {
+                'mssql' => 'dbo',
+                default => '',
+            },
             $tableRawNameSourceMessage,
             ['id'],
             'CASCADE',
