@@ -109,7 +109,7 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
         $this->assertSame(16, $tableSchema?->getColumn('locale')->getSize());
         $this->assertSame($this->translationType, $tableSchema?->getColumn('translation')->getType());
 
-        $foreignKeys = $tableSchema?->getForeignKeys();
+        $foreignKeys = array_values($tableSchema?->getForeignKeys());
 
         $foreignKeyExpected = new ForeignKey(
             $foreignKeys[0]->name,
