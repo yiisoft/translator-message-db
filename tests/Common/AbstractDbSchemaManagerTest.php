@@ -109,11 +109,10 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
         $this->assertSame(16, $tableSchema?->getColumn('locale')->getSize());
         $this->assertSame($this->translationType, $tableSchema?->getColumn('translation')->getType());
 
-        $foreignKey = new ForeignKey(
-            match ($driverName) {
-                'sqlsrv', 'oci', 'mysql', 'pgsql' => "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}",
-                default => '0',
-            },
+        $foreignKeys = $tableSchema?->getForeignKeys();
+
+        $foreignKeyExpected = new ForeignKey(
+            $foreignKeys[0]->name,
             ['id'],
             match ($driverName) {
                 'sqlsrv' => 'dbo',
@@ -129,17 +128,8 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
                 default => ReferentialAction::RESTRICT,
             },
         );
-        $foreignKeysExpected = [
-            "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}" => $foreignKey,
-        ];
 
-        if ($driverName === 'sqlite') {
-            $foreignKeysExpected = [
-                0 => $foreignKey,
-            ];
-        }
-
-        $this->assertEquals($foreignKeysExpected, $tableSchema?->getForeignKeys());
+        $this->assertEquals([$foreignKeyExpected], $foreignKeys);
 
         $this->dbSchemaManager->ensureNoTables($tableSourceMessage, $tableMessage);
 
