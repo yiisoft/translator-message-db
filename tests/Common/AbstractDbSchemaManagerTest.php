@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Constant\ColumnType;
+use Yiisoft\Db\Constant\ReferentialAction;
 use Yiisoft\Db\Constraint\ForeignKey;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
@@ -122,11 +123,10 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
             },
             $tableRawNameSourceMessage,
             ['id'],
-            'CASCADE',
+            ReferentialAction::CASCADE,
             match ($driverName) {
-                'mysql', 'pgsql' => 'RESTRICT',
-                'oci' => null,
-                default => 'NO ACTION',
+                'sqlsrv', 'oci' => null,
+                default => ReferentialAction::RESTRICT,
             },
         );
         $foreignKeysExpected = [

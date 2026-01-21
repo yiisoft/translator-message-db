@@ -7,20 +7,22 @@ namespace Yiisoft\Translator\Message\Db;
 use InvalidArgumentException;
 use JsonException;
 use Throwable;
-use Yiisoft\Arrays\ArrayHelper;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidCallException;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Expression\Value\ColumnName;
-use Yiisoft\Db\Expression\Value\Value;
-use Yiisoft\Db\Query\Query;
 use Yiisoft\Translator\MessageReaderInterface;
 use Yiisoft\Translator\MessageWriterInterface;
 
 use function array_key_exists;
+use function array_map;
 use function is_string;
+use function json_encode;
+use function md5;
+
+use const JSON_THROW_ON_ERROR;
 
 /**
  * Allows using a database as a message source for `yiisoft/translator`.
@@ -85,14 +87,16 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
     public function write(string $category, string $locale, array $messages): void
     {
         /** @psalm-var array<int, array<string, string|null>> $sourceMessages */
-        $sourceMessages = (new Query($this->db))
+        $sourceMessages = $this->db
             ->select(['id', 'message_id'])
             ->from($this->sourceMessageTable)
             ->where(['category' => $category])
-            ->all();
+            ->indexBy('message_id')
+            ->column();
 
-        $sourceMessages = ArrayHelper::map($sourceMessages, 'message_id', 'id');
         $translatedMessages = $this->readFromDb($category, $locale);
+
+        $command = $this->db->createCommand();
 
         foreach ($messages as $messageId => $messageData) {
             if (!array_key_exists('message', $messageData)) {
@@ -129,26 +133,17 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                 $sourceMessages[$messageId] = $result['id'];
             }
 
-            $needUpdate = false;
-            if (isset($translatedMessages[$messageId]) && $translatedMessages[$messageId]['message'] !== $messageData['message']) {
-                $this->db
-                    ->createCommand()
-                    ->delete($this->messageTable, ['id' => $sourceMessages[$messageId]])
-                    ->execute();
-                $needUpdate = true;
-            }
-
-            if ($needUpdate || !isset($translatedMessages[$messageId])) {
-                $this->db
-                    ->createCommand()
-                    ->insertReturningPks(
-                        $this->messageTable,
-                        [
-                            'id' => $sourceMessages[$messageId],
-                            'locale' => $locale,
-                            'translation' => $messageData['message'],
-                        ]
-                    );
+            if (!isset($translatedMessages[$messageId])
+                || $translatedMessages[$messageId]['message'] !== $messageData['message']
+            ) {
+                $command->upsert(
+                    $this->messageTable,
+                    [
+                        'id' => $sourceMessages[$messageId],
+                        'locale' => $locale,
+                        'translation' => $messageData['message'],
+                    ],
+                )->execute();
             }
         }
     }
@@ -167,7 +162,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             /** @psalm-var array<string, array<string, string>> */
             return $this->cache->getOrSet(
                 $this->getCacheKey($category, $locale),
-                fn () => $this->readFromDb($category, $locale),
+                fn (): array => $this->readFromDb($category, $locale),
                 $this->cachingDuration
             );
         }
@@ -184,26 +179,30 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
      */
     private function readFromDb(string $category, string $locale): array
     {
-        $query = (new Query($this->db))
+        /** @var array<string, string[]> $messages */
+        $messages = $this->db
             ->select(['message_id', 'translation', 'comment'])
             ->from(['ts' => $this->sourceMessageTable])
             ->innerJoin(
                 ['td' => $this->messageTable],
-                [
-                    'td.id' => new ColumnName('ts.id'),
-                    'ts.category' => new Value($category),
-                ]
+                ['td.id' => new ColumnName('ts.id')]
             )
-            ->where(['locale' => $locale]);
+            ->where([
+                'locale' => $locale,
+                'category' => $category,
+            ])
+            ->indexBy('message_id')
+            ->all();
 
-        /** @psalm-var array<int, array<string, string>> $messages */
-        $messages = $query->all();
-
-        /** @psalm-var array<string, array<string, string>> */
-        return ArrayHelper::map($messages, 'message_id', static fn (array $message): array => array_merge(
-            ['message' => $message['translation']],
-            !empty($message['comment']) ? ['comment' => $message['comment']] : []
-        ));
+        return array_map(
+            static fn (array $message): array => empty($message['comment'])
+                ? ['message' => $message['translation']]
+                : [
+                    'message' => $message['translation'],
+                    'comment' => $message['comment'],
+                ],
+            $messages,
+        );
     }
 
     /**
