@@ -7,7 +7,6 @@ namespace Yiisoft\Translator\Message\Db;
 use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
-use Yiisoft\Db\Exception\InvalidArgumentException;
 use Yiisoft\Db\Exception\InvalidConfigException;
 use Yiisoft\Db\Exception\NotSupportedException;
 use Yiisoft\Db\Schema\SchemaInterface;
@@ -37,8 +36,9 @@ final class DbSchemaManager
     ): void {
         $driverName = $this->db->getDriverName();
         $schema = $this->db->getSchema();
-        $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
-        $tableRawNameMessage = $schema->getRawTableName($tableMessage);
+        $quoter = $this->db->getQuoter();
+        $tableRawNameSourceMessage = $quoter->getRawTableName($tableSourceMessage);
+        $tableRawNameMessage = $quoter->getRawTableName($tableMessage);
 
         if ($this->hasTable($tableSourceMessage) && $this->hasTable($tableMessage)) {
             return;
@@ -82,8 +82,9 @@ final class DbSchemaManager
     ): void {
         $driverName = $this->db->getDriverName();
         $schema = $this->db->getSchema();
-        $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
-        $tableRawNameMessage = $schema->getRawTableName($tableMessage);
+        $quoter = $this->db->getQuoter();
+        $tableRawNameSourceMessage = $quoter->getRawTableName($tableSourceMessage);
+        $tableRawNameMessage = $quoter->getRawTableName($tableMessage);
 
         if ($this->hasTable($tableMessage)) {
             if ($driverName !== 'sqlite' && $schema->getTableForeignKeys($tableMessage, true) !== []) {
@@ -193,7 +194,6 @@ final class DbSchemaManager
     /**
      * Create index for tables '{{%yii_source_message}}' and '{{%yii_message}}'.
      *
-     * @throws InvalidArgumentException
      * @throws Exception
      * @throws Throwable
      */
@@ -217,7 +217,6 @@ final class DbSchemaManager
      * Create schema for tables in the database.
      *
      * @throws Exception
-     * @throws InvalidArgumentException
      * @throws InvalidConfigException
      * @throws NotSupportedException
      * @throws Throwable
@@ -230,6 +229,7 @@ final class DbSchemaManager
         string $tableMessage,
         string $tableRawNameMessage
     ): void {
+        $columnBuilder = $this->db->getColumnBuilderClass();
         $updateAction = 'RESTRICT';
 
         if ($driverName === 'sqlsrv') {
@@ -248,10 +248,10 @@ final class DbSchemaManager
             ->createTable(
                 $tableSourceMessage,
                 [
-                    'id' => $schema->createColumn(SchemaInterface::TYPE_PK),
-                    'category' => $schema->createColumn(SchemaInterface::TYPE_STRING),
-                    'message_id' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
-                    'comment' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                    'id' => $columnBuilder::primaryKey(),
+                    'category' => $columnBuilder::string(),
+                    'message_id' => $columnBuilder::text(),
+                    'comment' => $columnBuilder::text(),
                 ],
             )
             ->execute();
@@ -262,9 +262,9 @@ final class DbSchemaManager
             ->createTable(
                 $tableMessage,
                 [
-                    'id' => $schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
-                    'locale' => $schema->createColumn(SchemaInterface::TYPE_STRING, 16)->notNull(),
-                    'translation' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                    'id' => $columnBuilder::integer()->notNull(),
+                    'locale' => $columnBuilder::string(16)->notNull(),
+                    'translation' => $columnBuilder::text(),
                 ],
             )
             ->execute();
@@ -300,7 +300,6 @@ final class DbSchemaManager
      * Create schema for tables in SQLite database.
      *
      * @throws Exception
-     * @throws InvalidArgumentException
      * @throws InvalidConfigException
      * @throws NotSupportedException
      * @throws Throwable
@@ -312,16 +311,18 @@ final class DbSchemaManager
         string $tableMessage,
         string $tableRawNameMessage
     ): void {
+        $columnBuilder = $this->db->getColumnBuilderClass();
+
         // create table `yii_source_message`.
         $this->db
             ->createCommand()
             ->createTable(
                 $tableSourceMessage,
                 [
-                    'id' => $schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
-                    'category' => $schema->createColumn(SchemaInterface::TYPE_STRING),
-                    'message_id' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
-                    'comment' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                    'id' => $columnBuilder::integer()->notNull(),
+                    'category' => $columnBuilder::string(),
+                    'message_id' => $columnBuilder::text(),
+                    'comment' => $columnBuilder::text(),
                     "CONSTRAINT [[PK_{$tableRawNameSourceMessage}]] PRIMARY KEY ([[id]])",
                 ],
             )
@@ -333,9 +334,9 @@ final class DbSchemaManager
             ->createTable(
                 $tableMessage,
                 [
-                    'id' => $schema->createColumn(SchemaInterface::TYPE_INTEGER)->notNull(),
-                    'locale' => $schema->createColumn(SchemaInterface::TYPE_STRING, 16)->notNull(),
-                    'translation' => $schema->createColumn(SchemaInterface::TYPE_TEXT),
+                    'id' => $columnBuilder::integer()->notNull(),
+                    'locale' => $columnBuilder::string(16)->notNull(),
+                    'translation' => $columnBuilder::text(),
                     'PRIMARY KEY (`id`, `locale`)',
                     "CONSTRAINT `FK_{$tableRawNameMessage}_{$tableRawNameSourceMessage}` FOREIGN KEY (`id`) REFERENCES `$tableRawNameSourceMessage` (`id`) ON DELETE CASCADE",
                 ],

@@ -8,17 +8,19 @@ use PDO;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Oracle\Connection;
 use Yiisoft\Db\Oracle\Driver;
-use Yiisoft\Db\Oracle\Dsn;
 
 final class OracleFactory extends ConnectionFactory
 {
     public function createConnection(): ConnectionInterface
     {
-        $pdoDriver = new Driver(
-            (new Dsn('oci', 'localhost', 'XE', '1521', ['charset' => 'AL32UTF8']))->asString(),
-            'system',
-            'root'
-        );
+        $database = getenv('YII_ORACLE_DATABASE');
+        $host = getenv('YII_ORACLE_HOST');
+        $port = getenv('YII_ORACLE_PORT');
+        $user = getenv('YII_ORACLE_USER');
+        $password = getenv('YII_ORACLE_PASSWORD');
+
+        $pdoDriver = new Driver("oci:dbname=//$host:$port/$database", $user, $password);
+        $pdoDriver->charset('AL32UTF8');
         $pdoDriver->attributes([PDO::ATTR_STRINGIFY_FETCHES => true]);
 
         return new Connection($pdoDriver, $this->createSchemaCache());

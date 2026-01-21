@@ -29,11 +29,11 @@
         }
     ],
     "require": {
-        "php": "^8.1",
+        "php": "8.1 - 8.5",
         "ext-json": "*",
         "yiisoft/cache": "^2.0|^3.0",
         "yiisoft/arrays": "^2.0|^3.0",
-        "yiisoft/db": "^1.0",
+        "yiisoft/db": "^2.0",
         "yiisoft/translator": "^2.2|^3.0"
     },
     "require-dev": {
@@ -41,7 +41,13 @@
         "phpunit/phpunit": "^10.5.60",
         "rector/rector": "^2.3.1",
         "roave/infection-static-analysis-plugin": "^1.35",
-        "vimeo/psalm": "^5.26.1 || ^6"
+        "vimeo/psalm": "^5.26.1 || ^6.14.3",
+        "vlucas/phpdotenv": "^5.6.2",
+        "yiisoft/db-mssql": "^2.0",
+        "yiisoft/db-mysql": "^2.0",
+        "yiisoft/db-oracle": "^2.0",
+        "yiisoft/db-pgsql": "^2.0",
+        "yiisoft/db-sqlite": "^2.0"
     },
     "autoload": {
         "psr-4": {

@@ -10,6 +10,8 @@ on:
       - 'psalm.xml'
 
   push:
+    branches:
+      - master
     paths-ignore:
       - 'docs/**'
       - 'README.md'
@@ -32,34 +34,40 @@ jobs:
     env:
       extensions: pdo, pdo_mysql
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-
         php:
           - 8.1
           - 8.2
           - 8.3
-
+          - 8.4
+          - 8.5
         mariadb:
-          - mariadb:10.4
-          - mariadb:10.5
-          - mariadb:10.6
-          - mariadb:10.7
-          - mariadb:10.8
-          - mariadb:10.9
           - mariadb:latest
+        include:
+          - php: 8.5
+            mariadb: mariadb:10.4
+          - php: 8.5
+            mariadb: mariadb:10.5
+          - php: 8.5
+            mariadb: mariadb:10.6
+          - php: 8.5
+            mariadb: mariadb:10.7
+          - php: 8.5
+            mariadb: mariadb:10.8
+          - php: 8.5
+            mariadb: mariadb:10.9
 
     services:
       mysql:
         image: ${{ matrix.mariadb }}
         env:
           MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
-          MARIADB_ROOT_PASSWORD: ''
-          MARIADB_DATABASE: yiitest
+          MARIADB_DATABASE: translator-message-db-test
+          MARIADB_USER: yii
+          MARIADB_PASSWORD: 'q1w2e3r4'
         ports:
           - 3306:3306
         options: --health-cmd="mariadb-admin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -80,11 +88,21 @@ jobs:
       - name: Update composer.
         run: composer self-update
 
-      - name: Install db-mysql.
-        run: composer require yiisoft/db-mysql --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
+      - name: Remove unused dependencies of DB drivers
+        run: composer remove --dev yiisoft/db-sqlite yiisoft/db-pgsql yiisoft/db-mssql yiisoft/db-oracle
+
+      - name: Install dependencies with composer
+        run: composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
       - name: Run tests with phpunit.
         run: vendor/bin/phpunit --testsuite=Mysql --coverage-clover=coverage.xml --colors=always
+        env:
+          ENVIRONMENT: ci
+          YII_MYSQL_DATABASE: translator-message-db-test
+          YII_MYSQL_HOST: 127.0.0.1
+          YII_MYSQL_PORT: 3306
+          YII_MYSQL_USER: yii
+          YII_MYSQL_PASSWORD: q1w2e3r4
 
       - name: Upload coverage to Codecov.
         if: matrix.php == '8.1'

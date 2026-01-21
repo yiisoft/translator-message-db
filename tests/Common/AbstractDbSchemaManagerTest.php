@@ -7,16 +7,17 @@ namespace Yiisoft\Translator\Message\Db\Tests\Common;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
+use Yiisoft\Db\Constant\ColumnType;
+use Yiisoft\Db\Constraint\ForeignKey;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
-use Yiisoft\Db\Schema\SchemaInterface;
 use Yiisoft\Translator\Message\Db\DbSchemaManager;
 
 abstract class AbstractDbSchemaManagerTest extends TestCase
 {
-    protected string $commentType = SchemaInterface::TYPE_TEXT;
-    protected string $messageIdType = SchemaInterface::TYPE_TEXT;
-    protected string $translationType = SchemaInterface::TYPE_TEXT;
+    protected string $commentType = ColumnType::TEXT;
+    protected string $messageIdType = ColumnType::TEXT;
+    protected string $translationType = ColumnType::TEXT;
     protected ConnectionInterface $db;
     private DbSchemaManager $dbSchemaManager;
 
@@ -56,10 +57,6 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
 
     /**
      * @dataProvider tableNameProvider
-     *
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws Throwable
      */
     public function testEnsureTableExist(string $tableSourceMessage, string $tableMessage): void
     {
@@ -81,27 +78,23 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
 
     /**
      * @dataProvider tableNameProvider
-     *
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws Throwable
      */
     public function testVerifyTableStructure(string $tableSourceMessage, string $tableMessage): void
     {
         $this->dbSchemaManager->ensureTables($tableSourceMessage, $tableMessage);
 
         $driverName = $this->db->getDriverName();
-        $schema = $this->db->getSchema();
-        $tableRawNameSourceMessage = $schema->getRawTableName($tableSourceMessage);
-        $tableRawNameMessage = $schema->getRawTableName($tableMessage);
+        $quoter = $this->db->getQuoter();
+        $tableRawNameSourceMessage = $quoter->getRawTableName($tableSourceMessage);
+        $tableRawNameMessage = $quoter->getRawTableName($tableMessage);
 
         $tableSchema = $this->db->getTableSchema($tableSourceMessage);
 
         $this->assertSame($tableRawNameSourceMessage, $tableSchema?->getName());
         $this->assertSame(['id'], $tableSchema?->getPrimaryKey());
         $this->assertSame(['id', 'category', 'message_id', 'comment'], $tableSchema?->getColumnNames());
-        $this->assertSame(SchemaInterface::TYPE_INTEGER, $tableSchema?->getColumn('id')->getType());
-        $this->assertSame(SchemaInterface::TYPE_STRING, $tableSchema?->getColumn('category')->getType());
+        $this->assertSame(ColumnType::INTEGER, $tableSchema?->getColumn('id')->getType());
+        $this->assertSame(ColumnType::STRING, $tableSchema?->getColumn('category')->getType());
         $this->assertSame($this->messageIdType, $tableSchema?->getColumn('message_id')->getType());
         $this->assertSame($this->commentType, $tableSchema?->getColumn('comment')->getType());
 
@@ -110,28 +103,43 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
         $this->assertSame($tableRawNameMessage, $tableSchema?->getName());
         $this->assertSame(['id', 'locale'], $tableSchema?->getPrimaryKey());
         $this->assertSame(['id', 'locale', 'translation'], $tableSchema?->getColumnNames());
-        $this->assertSame(SchemaInterface::TYPE_INTEGER, $tableSchema?->getColumn('id')->getType());
-        $this->assertSame(SchemaInterface::TYPE_STRING, $tableSchema?->getColumn('locale')->getType());
+        $this->assertSame(ColumnType::INTEGER, $tableSchema?->getColumn('id')->getType());
+        $this->assertSame(ColumnType::STRING, $tableSchema?->getColumn('locale')->getType());
         $this->assertSame(16, $tableSchema?->getColumn('locale')->getSize());
         $this->assertSame($this->translationType, $tableSchema?->getColumn('translation')->getType());
 
+        $foreignKey = new ForeignKey(
+            match ($driverName) {
+                'sqlsrv', 'oci', 'mysql', 'pgsql' => "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}",
+                default => '0',
+            },
+            ['id'],
+            match ($driverName) {
+                'sqlsrv' => 'dbo',
+                'pgsql' => 'public',
+                'oci' => 'YII',
+                default => '',
+            },
+            $tableRawNameSourceMessage,
+            ['id'],
+            'CASCADE',
+            match ($driverName) {
+                'mysql', 'pgsql' => 'RESTRICT',
+                'oci' => null,
+                default => 'NO ACTION',
+            },
+        );
         $foreignKeysExpected = [
-            "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}" => [
-                0 => $tableRawNameSourceMessage,
-                'id' => 'id',
-            ],
+            "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}" => $foreignKey,
         ];
 
-        if ($driverName === 'oci' || $driverName === 'sqlite') {
+        if ($driverName === 'sqlite') {
             $foreignKeysExpected = [
-                0 => [
-                    0 => $tableRawNameSourceMessage,
-                    'id' => 'id',
-                ],
+                0 => $foreignKey,
             ];
         }
 
-        $this->assertSame($foreignKeysExpected, $tableSchema?->getForeignKeys());
+        $this->assertEquals($foreignKeysExpected, $tableSchema?->getForeignKeys());
 
         $this->dbSchemaManager->ensureNoTables($tableSourceMessage, $tableMessage);
 

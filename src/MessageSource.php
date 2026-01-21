@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Yiisoft\Translator\Message\Db;
 
+use InvalidArgumentException;
 use JsonException;
-use RuntimeException;
 use Throwable;
 use Yiisoft\Arrays\ArrayHelper;
 use Yiisoft\Cache\CacheInterface;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Exception\Exception;
-use Yiisoft\Db\Exception\InvalidArgumentException;
 use Yiisoft\Db\Exception\InvalidCallException;
 use Yiisoft\Db\Exception\InvalidConfigException;
-use Yiisoft\Db\Expression\Expression;
+use Yiisoft\Db\Expression\Value\ColumnName;
+use Yiisoft\Db\Expression\Value\Value;
 use Yiisoft\Db\Query\Query;
 use Yiisoft\Translator\MessageReaderInterface;
 use Yiisoft\Translator\MessageWriterInterface;
@@ -115,10 +115,9 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                     $comment = $messageData['comment'];
                 }
 
-                /** @psalm-var array<string,string>|false $result */
                 $result = $this->db
                     ->createCommand()
-                    ->insertWithReturningPks(
+                    ->insertReturningPks(
                         $this->sourceMessageTable,
                         [
                             'category' => $category,
@@ -126,10 +125,6 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                             'comment' => $comment,
                         ],
                     );
-
-                if ($result === false) {
-                    throw new RuntimeException("Failed to write source message with \"$messageId\" ID.");
-                }
 
                 $sourceMessages[$messageId] = $result['id'];
             }
@@ -144,9 +139,9 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             }
 
             if ($needUpdate || !isset($translatedMessages[$messageId])) {
-                $result = $this->db
+                $this->db
                     ->createCommand()
-                    ->insertWithReturningPks(
+                    ->insertReturningPks(
                         $this->messageTable,
                         [
                             'id' => $sourceMessages[$messageId],
@@ -154,10 +149,6 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
                             'translation' => $messageData['message'],
                         ]
                     );
-
-                if ($result === false) {
-                    throw new RuntimeException("Failed to write message with \"$messageId\" ID.");
-                }
             }
         }
     }
@@ -199,8 +190,8 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             ->innerJoin(
                 ['td' => $this->messageTable],
                 [
-                    'td.id' => new Expression('[[ts.id]]'),
-                    'ts.category' => $category,
+                    'td.id' => new ColumnName('ts.id'),
+                    'ts.category' => new Value($category),
                 ]
             )
             ->where(['locale' => $locale]);
