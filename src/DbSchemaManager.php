@@ -139,7 +139,7 @@ final class DbSchemaManager
                     'id' => $columnBuilder::integer()->notNull()->reference($foreignKey),
                     'locale' => $columnBuilder::string(16)->notNull(),
                     'translation' => $columnBuilder::text(),
-                    'PRIMARY KEY (`id`, `locale`)',
+                    'PRIMARY KEY ([[id]], [[locale]])',
                 ],
             )
             ->execute();
