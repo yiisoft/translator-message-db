@@ -12,6 +12,8 @@ use Yiisoft\Db\Constraint\ForeignKey;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
 
+use function dirname;
+
 /**
  * @group Mssql
  */

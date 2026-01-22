@@ -38,12 +38,11 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
 
     public function __construct(
         private ConnectionInterface $db,
-        private CacheInterface|null $cache = null,
+        private ?CacheInterface $cache = null,
         private string $sourceMessageTable = '{{%yii_source_message}}',
         private string $messageTable = '{{%yii_message}}',
-        private int $cachingDuration = 3600
-    ) {
-    }
+        private int $cachingDuration = 3600,
+    ) {}
 
     /**
      * @throws Exception
@@ -51,7 +50,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
      * @throws InvalidConfigException
      * @throws Throwable
      */
-    public function getMessage(string $id, string $category, string $locale, array $parameters = []): string|null
+    public function getMessage(string $id, string $category, string $locale, array $parameters = []): ?string
     {
         if (!isset($this->messages[$category][$locale])) {
             $this->messages[$category][$locale] = $this->read($category, $locale);
@@ -162,8 +161,8 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             /** @psalm-var array<string, array<string, string>> */
             return $this->cache->getOrSet(
                 $this->getCacheKey($category, $locale),
-                fn (): array => $this->readFromDb($category, $locale),
-                $this->cachingDuration
+                fn(): array => $this->readFromDb($category, $locale),
+                $this->cachingDuration,
             );
         }
 
@@ -185,7 +184,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             ->from(['ts' => $this->sourceMessageTable])
             ->innerJoin(
                 ['td' => $this->messageTable],
-                ['td.id' => new ColumnName('ts.id')]
+                ['td.id' => new ColumnName('ts.id')],
             )
             ->where([
                 'locale' => $locale,
@@ -195,7 +194,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
             ->all();
 
         return array_map(
-            static fn (array $message): array => empty($message['comment'])
+            static fn(array $message): array => empty($message['comment'])
                 ? ['message' => $message['translation']]
                 : [
                     'message' => $message['translation'],
