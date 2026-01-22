@@ -131,7 +131,7 @@ final class DbSchemaManager
         if ($driverName === 'mysql') {
             $columns[] = "CONSTRAINT `FK_{$tableSourceMessage}_{$tableMessage}`"
                 . " FOREIGN KEY (`id`) REFERENCES `{$tableSourceMessage}` (`id`)"
-                . " ON DELETE CASCADE ON UPDATE RESTRICT";
+                . ' ON DELETE CASCADE ON UPDATE RESTRICT';
         } else {
             $foreignKey = new ForeignKey(
                 foreignTableName: $tableSourceMessage,
