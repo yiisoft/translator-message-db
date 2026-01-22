@@ -41,7 +41,7 @@ final class DbSchemaManager
         $tableRawNameMessage = $quoter->getRawTableName($tableMessage);
 
         if ($schema->hasTable($tableRawNameSourceMessage, refresh: true)
-            && $schema->hasTable($tableRawNameMessage, refresh: true)
+            && $schema->hasTable($tableRawNameMessage)
         ) {
             return;
         }
@@ -73,7 +73,7 @@ final class DbSchemaManager
             $this->db->createCommand()->dropTable($tableRawNameMessage)->execute();
         }
 
-        if ($schema->hasTable($tableRawNameSourceMessage, refresh: true)) {
+        if ($schema->hasTable($tableRawNameSourceMessage)) {
             // drop table `yii_source_message`.
             $this->db->createCommand()->dropTable($tableRawNameSourceMessage)->execute();
         }
@@ -121,44 +121,32 @@ final class DbSchemaManager
             )
             ->execute();
 
+        $columns = [
+            'id' => $columnBuilder::integer()->notNull(),
+            'locale' => $columnBuilder::string(16)->notNull(),
+            'translation' => $columnBuilder::text(),
+            'PRIMARY KEY ([[id]], [[locale]])',
+        ];
 
-        $foreignKey = $driverName !== 'mysql'
-            ? new ForeignKey(
+        if ($driverName === 'mysql') {
+            $columns[] = "CONSTRAINT FK_{$tableSourceMessage}_{$tableMessage}"
+                . " FOREIGN KEY ([[id]]) REFERENCES {$tableMessage} ([[id]])"
+                . " ON DELETE CASCADE ON UPDATE RESTRICT";
+        } else {
+            $foreignKey = new ForeignKey(
                 foreignTableName: $tableSourceMessage,
                 foreignColumnNames: ['id'],
                 onDelete: ReferentialAction::CASCADE,
                 onUpdate: ReferentialAction::RESTRICT,
-            )
-            : null;
+            );
+            $columns['id']->reference($foreignKey);
+        }
 
         // create table `yii_message`.
         $this->db
             ->createCommand()
-            ->createTable(
-                $tableMessage,
-                [
-                    'id' => $columnBuilder::integer()->notNull()->reference($foreignKey),
-                    'locale' => $columnBuilder::string(16)->notNull(),
-                    'translation' => $columnBuilder::text(),
-                    'PRIMARY KEY ([[id]], [[locale]])',
-                ],
-            )
+            ->createTable($tableMessage, $columns)
             ->execute();
-
-        if ($driverName === 'mysql') {
-            $this->db
-                ->createCommand()
-                ->addForeignKey(
-                    $tableMessage,
-                    "FK_{$tableSourceMessage}_{$tableMessage}",
-                    ['id'],
-                    $tableSourceMessage,
-                    ['id'],
-                    ReferentialAction::CASCADE,
-                    ReferentialAction::RESTRICT,
-                )
-                ->execute();
-        }
 
         $this->createIndex($tableSourceMessage, $tableMessage);
     }
