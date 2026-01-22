@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Throwable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Db\Constant\ColumnType;
+use Yiisoft\Db\Constant\ReferentialAction;
 use Yiisoft\Db\Constraint\ForeignKey;
 use Yiisoft\Db\Exception\Exception;
 use Yiisoft\Db\Exception\InvalidConfigException;
@@ -108,11 +109,10 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
         $this->assertSame(16, $tableSchema?->getColumn('locale')->getSize());
         $this->assertSame($this->translationType, $tableSchema?->getColumn('translation')->getType());
 
-        $foreignKey = new ForeignKey(
-            match ($driverName) {
-                'sqlsrv', 'oci', 'mysql', 'pgsql' => "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}",
-                default => '0',
-            },
+        $foreignKeys = array_values($tableSchema?->getForeignKeys());
+
+        $foreignKeyExpected = new ForeignKey(
+            $foreignKeys[0]->name,
             ['id'],
             match ($driverName) {
                 'sqlsrv' => 'dbo',
@@ -122,24 +122,15 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
             },
             $tableRawNameSourceMessage,
             ['id'],
-            'CASCADE',
+            ReferentialAction::CASCADE,
             match ($driverName) {
-                'mysql', 'pgsql' => 'RESTRICT',
                 'oci' => null,
-                default => 'NO ACTION',
+                'sqlsrv' => ReferentialAction::NO_ACTION,
+                default => ReferentialAction::RESTRICT,
             },
         );
-        $foreignKeysExpected = [
-            "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}" => $foreignKey,
-        ];
 
-        if ($driverName === 'sqlite') {
-            $foreignKeysExpected = [
-                0 => $foreignKey,
-            ];
-        }
-
-        $this->assertEquals($foreignKeysExpected, $tableSchema?->getForeignKeys());
+        $this->assertEquals([$foreignKeyExpected], $foreignKeys);
 
         $this->dbSchemaManager->ensureNoTables($tableSourceMessage, $tableMessage);
 

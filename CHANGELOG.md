@@ -4,7 +4,7 @@
 
 - Chg #81: Raise the minimum PHP version to 8.1 (@vjik)
 - Chg #82: Change PHP constraint in composer.json to `8.1 - 8.5` (@vjik)
-- Chg #82: Bump required `yiisoft/db` version to `^2.0` (@vjik)
+- Chg #82, #84: Bump required `yiisoft/db` version to `^2.0` (@vjik, @Tigrov)
 - Enh #69: Add support of `yiisoft/cache` version `^3.0` (@thenotsoft)
 - Enh #66: Add support of `yiisoft/translator` version `^3.0` (@thenotsoft)
 
