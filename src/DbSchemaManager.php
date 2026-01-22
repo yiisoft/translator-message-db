@@ -107,6 +107,7 @@ final class DbSchemaManager
         string $tableSourceMessage,
         string $tableMessage,
     ): void {
+        $driverName = $this->db->getDriverName();
         $columnBuilder = $this->db->getColumnBuilderClass();
 
         // create table `yii_sorce_message`.
@@ -123,12 +124,15 @@ final class DbSchemaManager
             )
             ->execute();
 
-        $foreignKey = new ForeignKey(
-            foreignTableName: $tableSourceMessage,
-            foreignColumnNames: ['id'],
-            onDelete: ReferentialAction::CASCADE,
-            onUpdate: ReferentialAction::RESTRICT,
-        );
+
+        $foreignKey = $driverName !== 'mysql'
+            ? new ForeignKey(
+                foreignTableName: $tableSourceMessage,
+                foreignColumnNames: ['id'],
+                onDelete: ReferentialAction::CASCADE,
+                onUpdate: ReferentialAction::RESTRICT,
+            )
+            : null;
 
         // create table `yii_message`.
         $this->db
@@ -143,6 +147,27 @@ final class DbSchemaManager
                 ],
             )
             ->execute();
+
+        $driverName = $this->db->getDriverName();
+
+        if ($driverName === 'mysql') {
+            $quoter = $this->db->getQuoter();
+            $tableRawNameSourceMessage = $quoter->getRawTableName($tableSourceMessage);
+            $tableRawNameMessage = $quoter->getRawTableName($tableMessage);
+
+            $this->db
+                ->createCommand()
+                ->addForeignKey(
+                    $tableRawNameMessage,
+                    "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}",
+                    ['id'],
+                    $tableRawNameSourceMessage,
+                    ['id'],
+                    ReferentialAction::CASCADE,
+                    ReferentialAction::RESTRICT,
+                )
+                ->execute();
+        }
 
         $this->createIndex($tableSourceMessage, $tableMessage);
     }
