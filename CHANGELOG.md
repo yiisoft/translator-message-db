@@ -7,6 +7,7 @@
 - Chg #82: Bump required `yiisoft/db` version to `^2.0` (@vjik)
 - Enh #69: Add support of `yiisoft/cache` version `^3.0` (@thenotsoft)
 - Enh #66: Add support of `yiisoft/translator` version `^3.0` (@thenotsoft)
+- Enh #84: Refactor according to `yiisoft/db` version `^2.0` (@Tigrov)
 
 ## 1.0.0 May 09, 2023
 
