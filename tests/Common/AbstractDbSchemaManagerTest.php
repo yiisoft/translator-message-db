@@ -124,7 +124,8 @@ abstract class AbstractDbSchemaManagerTest extends TestCase
             ['id'],
             ReferentialAction::CASCADE,
             match ($driverName) {
-                'sqlsrv', 'oci' => null,
+                'oci' => null,
+                'sqlsrv' => ReferentialAction::NO_ACTION,
                 default => ReferentialAction::RESTRICT,
             },
         );
