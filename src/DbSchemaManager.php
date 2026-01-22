@@ -148,8 +148,6 @@ final class DbSchemaManager
             )
             ->execute();
 
-        $driverName = $this->db->getDriverName();
-
         if ($driverName === 'mysql') {
             $quoter = $this->db->getQuoter();
             $tableRawNameSourceMessage = $quoter->getRawTableName($tableSourceMessage);
