@@ -46,7 +46,7 @@ final class DbSchemaManager
             return;
         }
 
-        $this->createSchema($tableSourceMessage, $tableMessage);
+        $this->createSchema($tableRawNameSourceMessage, $tableRawNameMessage);
     }
 
     /**
@@ -70,28 +70,25 @@ final class DbSchemaManager
 
         if ($schema->hasTable($tableRawNameMessage, refresh: true)) {
             // drop table `yii_message`.
-            $this->db->createCommand()->dropTable($tableMessage)->execute();
+            $this->db->createCommand()->dropTable($tableRawNameMessage)->execute();
         }
 
         if ($schema->hasTable($tableRawNameSourceMessage, refresh: true)) {
             // drop table `yii_source_message`.
-            $this->db->createCommand()->dropTable($tableSourceMessage)->execute();
+            $this->db->createCommand()->dropTable($tableRawNameSourceMessage)->execute();
         }
     }
 
     private function createIndex(string $tableSourceMessage, string $tableMessage): void
     {
-        $quoter = $this->db->getQuoter();
-        $tableRawNameSourceMessage = $quoter->getRawTableName($tableSourceMessage);
-        $tableRawNameMessage = $quoter->getRawTableName($tableMessage);
         $command = $this->db->createCommand();
 
         $command
-            ->createIndex($tableSourceMessage, "IDX_{$tableRawNameSourceMessage}_category", 'category')
+            ->createIndex($tableSourceMessage, "IDX_{$tableSourceMessage}_category", 'category')
             ->execute();
 
         $command
-            ->createIndex($tableMessage, "IDX_{$tableRawNameMessage}_locale", 'locale')
+            ->createIndex($tableMessage, "IDX_{$tableMessage}_locale", 'locale')
             ->execute();
     }
 
@@ -149,17 +146,13 @@ final class DbSchemaManager
             ->execute();
 
         if ($driverName === 'mysql') {
-            $quoter = $this->db->getQuoter();
-            $tableRawNameSourceMessage = $quoter->getRawTableName($tableSourceMessage);
-            $tableRawNameMessage = $quoter->getRawTableName($tableMessage);
-
             $this->db
                 ->createCommand()
                 ->addForeignKey(
-                    $tableRawNameMessage,
-                    "FK_{$tableRawNameSourceMessage}_{$tableRawNameMessage}",
+                    $tableMessage,
+                    "FK_{$tableSourceMessage}_{$tableMessage}",
                     ['id'],
-                    $tableRawNameSourceMessage,
+                    $tableSourceMessage,
                     ['id'],
                     ReferentialAction::CASCADE,
                     ReferentialAction::RESTRICT,
