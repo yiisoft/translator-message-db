@@ -17,9 +17,7 @@ use Yiisoft\Db\Exception\NotSupportedException;
  */
 final class DbSchemaManager
 {
-    public function __construct(private ConnectionInterface $db)
-    {
-    }
+    public function __construct(private ConnectionInterface $db) {}
 
     /**
      * Ensures that the translator tables exists in the database.

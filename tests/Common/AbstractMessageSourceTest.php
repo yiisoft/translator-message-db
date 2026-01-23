@@ -84,13 +84,12 @@ abstract class AbstractMessageSourceTest extends TestCase
             $messageSource->write($category, $locale, $data);
         }
 
-
         foreach ($allData as $fileData) {
             [$category, $locale, $data] = $fileData;
             foreach ($data as $messageId => $messageData) {
                 $this->assertEquals(
                     $messageData['message'],
-                    $messageSource->getMessage($messageId, $category, $locale)
+                    $messageSource->getMessage($messageId, $category, $locale),
                 );
             }
         }
