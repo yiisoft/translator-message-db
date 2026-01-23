@@ -1,5 +1,9 @@
 # Yii Translator DB Message Storage Change Log
 
+## 1.1.1 under development
+
+- no changes in this release.
+
 ## 1.1.0 January 23, 2026
 
 - Chg #81: Raise the minimum PHP version to 8.1 (@vjik)
