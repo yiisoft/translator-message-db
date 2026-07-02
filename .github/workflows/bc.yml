@@ -12,7 +12,7 @@ permissions:
   contents: read
 jobs:
   roave_bc_check:
-    uses: yiisoft/actions/.github/workflows/bc.yml@master
+    uses: yiisoft/actions/.github/workflows/bc.yml@13cb4941a5965cb2bbf16ed0578d2f8b04e978cb # master
     with:
       os: >-
         ['ubuntu-latest']
