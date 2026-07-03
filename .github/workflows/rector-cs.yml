@@ -19,6 +19,6 @@ concurrency:
 
 jobs:
   rector:
-    uses: yiisoft/actions/.github/workflows/rector-cs.yml@13cb4941a5965cb2bbf16ed0578d2f8b04e978cb # master
+    uses: yiisoft/actions/.github/workflows/rector-cs.yml@master
     with:
       php: '8.1'
