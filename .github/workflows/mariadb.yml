@@ -27,9 +27,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
 jobs:
   tests:
-    name: PHP ${{ matrix.php }}-mariadb-${{ matrix.mariadb }}
+    name: PHP ${{ matrix.php }}-mariadb-${{ matrix.mariadb.version }}
 
     env:
       extensions: pdo, pdo_mysql
@@ -45,24 +47,37 @@ jobs:
           - 8.4
           - 8.5
         mariadb:
-          - mariadb:latest
+          - version: 12
+            image: mariadb:12@sha256:628f228f0fd5913a220438693576b29b6fe4dc1fa0a1298c0e98579fae28635f
         include:
           - php: 8.5
-            mariadb: mariadb:10.4
+            mariadb:
+              version: 10.4
+              image: mariadb:10.4@sha256:22edfe1c78349f8cae88bbb5c2873b7e6c515be767c91c691308ce57445806f3
           - php: 8.5
-            mariadb: mariadb:10.5
+            mariadb:
+              version: 10.5
+              image: mariadb:10.5@sha256:a530aeeefd82f4fa5150f391b6c75462140904780338766f6b03acecb1cca3ce
           - php: 8.5
-            mariadb: mariadb:10.6
+            mariadb:
+              version: 10.6
+              image: mariadb:10.6@sha256:114d40be36852d0a019afd8458f7e1cc63fd300403b115b1f32e31130d5f671b
           - php: 8.5
-            mariadb: mariadb:10.7
+            mariadb:
+              version: 10.7
+              image: mariadb:10.7@sha256:9a48ac9f196f3d4fd6fea2cab59a49df9e7ca459bf14b2f7b85a0e38a5454571
           - php: 8.5
-            mariadb: mariadb:10.8
+            mariadb:
+              version: 10.8
+              image: mariadb:10.8@sha256:456709ab146585d6189da05669b84384518baecd83670c9e5221f8c20a47cf1e
           - php: 8.5
-            mariadb: mariadb:10.9
+            mariadb:
+              version: 10.9
+              image: mariadb:10.9@sha256:56710811b0b96233ef84f4982d3337d88d3aa46a68f3fcb2853b94e1d04ea25c
 
     services:
       mysql:
-        image: ${{ matrix.mariadb }}
+        image: ${{ matrix.mariadb.image }}
         env:
           MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
           MARIADB_DATABASE: translator-message-db-test
@@ -74,10 +89,12 @@ jobs:
 
     steps:
       - name: Checkout.
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
+        with:
+          persist-credentials: false
 
       - name: Install PHP with extensions.
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45
         with:
           php-version: ${{ matrix.php }}
           extensions: ${{ env.extensions }}
@@ -106,7 +123,7 @@ jobs:
 
       - name: Upload coverage to Codecov.
         if: matrix.php == '8.1'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml

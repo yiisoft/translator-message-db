@@ -27,9 +27,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
 jobs:
   tests:
-    name: PHP ${{ matrix.php }}-oracle-${{ matrix.oracle }}
+    name: PHP ${{ matrix.php }}-oracle-${{ matrix.oracle.version }}
 
     env:
       extensions: pdo, pdo_oci, oci8
@@ -45,14 +47,17 @@ jobs:
           - 8.4
           - 8.5
         oracle:
-          - 21
+          - version: 21
+            image: gvenzl/oracle-xe:21@sha256:c2682a4216b0fe65537912c4a049c7e5c15a85bb7c94bb8137d5f2d2eef60603
         include:
           - php: 8.5
-            oracle: 18
+            oracle:
+              version: 18
+              image: gvenzl/oracle-xe:18@sha256:f7e58d04a6192eca9b92922c801102669d992b3f88fc2287aae1cd35889e4293
 
     services:
       oci:
-        image: gvenzl/oracle-xe:${{ matrix.oracle }}
+        image: ${{ matrix.oracle.image }}
         ports:
           - 1521:1521
         env:
@@ -69,10 +74,12 @@ jobs:
 
     steps:
       - name: Checkout.
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
+        with:
+          persist-credentials: false
 
       - name: Install PHP with extensions.
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45
         with:
           php-version: ${{ matrix.php }}
           extensions: ${{ env.extensions }}
@@ -101,7 +108,7 @@ jobs:
 
       - name: Upload coverage to Codecov.
         if: matrix.php == '8.1'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
