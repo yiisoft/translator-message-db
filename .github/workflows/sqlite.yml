@@ -5,6 +5,7 @@ on:
     paths: &paths
       - 'src/**'
       - 'tests/**'
+      - 'sql/sqlite-*.sql'
       - 'phpunit.xml.dist'
       - 'composer.json'
       - '.github/workflows/sqlite.yml'

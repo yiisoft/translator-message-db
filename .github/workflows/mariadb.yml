@@ -5,6 +5,7 @@ on:
     paths: &paths
       - 'src/**'
       - 'tests/**'
+      - 'sql/mysql-*.sql'
       - 'phpunit.xml.dist'
       - 'composer.json'
       - '.github/workflows/mariadb.yml'

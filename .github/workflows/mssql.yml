@@ -5,6 +5,7 @@ on:
     paths: &paths
       - 'src/**'
       - 'tests/**'
+      - 'sql/sqlsrv-*.sql'
       - 'phpunit.xml.dist'
       - 'composer.json'
       - '.github/workflows/mssql.yml'

@@ -5,6 +5,7 @@ on:
     paths: &paths
       - 'src/**'
       - 'tests/**'
+      - 'sql/pgsql-*.sql'
       - 'phpunit.xml.dist'
       - 'composer.json'
       - '.github/workflows/pgsql.yml'

@@ -5,6 +5,7 @@ on:
     paths: &paths
       - 'src/**'
       - 'tests/**'
+      - 'sql/oci-*.sql'
       - 'phpunit.xml.dist'
       - 'composer.json'
       - '.github/workflows/oracle.yml'
