@@ -64,8 +64,8 @@ vendor/bin/roave-infection-static-analysis-plugin \
 --only-covered" ## Run mutation tests using Infection
 mutation: run
 
-composer-require-checker: CMD="vendor/bin/composer-require-checker" ## Check dependencies using Composer Require Checker
-composer-require-checker: run
+dependency-analyser: CMD="vendor/bin/composer-dependency-analyser" ## Check dependencies using Composer Dependency Analyser
+dependency-analyser: run
 
 rector: CMD="vendor/bin/rector" ## Check code style using Rector
 rector: run
