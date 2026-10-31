@@ -52,9 +52,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
      */
     public function getMessage(string $id, string $category, string $locale, array $parameters = []): ?string
     {
-        if (!isset($this->messages[$category][$locale])) {
-            $this->messages[$category][$locale] = $this->read($category, $locale);
-        }
+        $this->messages[$category][$locale] ??= $this->read($category, $locale);
 
         return $this->messages[$category][$locale][$id]['message'] ?? null;
     }
@@ -67,9 +65,7 @@ final class MessageSource implements MessageReaderInterface, MessageWriterInterf
      */
     public function getMessages(string $category, string $locale): array
     {
-        if (!isset($this->messages[$category][$locale])) {
-            $this->messages[$category][$locale] = $this->read($category, $locale);
-        }
+        $this->messages[$category][$locale] ??= $this->read($category, $locale);
 
         return $this->messages[$category][$locale] ?? [];
     }
